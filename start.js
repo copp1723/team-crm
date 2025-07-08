@@ -19,8 +19,10 @@ import { TeamCRMServer } from './src/team-crm-server.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-// Load environment variables
-dotenv.config();
+// Load environment variables (only in development)
+if (process.env.NODE_ENV !== 'production') {
+    dotenv.config();
+}
 
 /**
  * Load configuration from config file
