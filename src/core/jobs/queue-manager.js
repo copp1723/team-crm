@@ -10,6 +10,17 @@ import { AIRetryHandler } from '../../utils/ai-retry-handler.js';
 
 export class QueueManager {
     constructor(options = {}) {
+        this.logger = logger.child({ component: 'QueueManager' });
+        this.enabled = false;
+        
+        // Check if Redis is available
+        const hasRedis = process.env.REDIS_URL || process.env.REDIS_HOST || options.redisHost;
+        
+        if (!hasRedis) {
+            this.logger.warn('Redis not configured - Queue Manager disabled');
+            return;
+        }
+        
         this.redisConfig = {
             host: options.redisHost || process.env.REDIS_HOST || 'localhost',
             port: options.redisPort || process.env.REDIS_PORT || 6379,
@@ -25,8 +36,8 @@ export class QueueManager {
         this.workers = new Map();
         this.queueEvents = new Map();
         this.isInitialized = false;
+        this.enabled = true;
         
-        this.logger = logger.child({ component: 'QueueManager' });
         this.aiRetryHandler = new AIRetryHandler();
         
         // Queue configurations
@@ -107,6 +118,11 @@ export class QueueManager {
      * Initialize the queue manager
      */
     async initialize() {
+        if (!this.enabled) {
+            this.logger.info('Queue Manager skipped - Redis not configured');
+            return;
+        }
+        
         try {
             this.logger.info('Initializing Queue Manager...');
             
@@ -128,7 +144,8 @@ export class QueueManager {
             
         } catch (error) {
             this.logger.error('Failed to initialize Queue Manager', { error });
-            throw error;
+            this.enabled = false;
+            // Don't throw - allow app to continue without queue processing
         }
     }
     
@@ -217,6 +234,11 @@ export class QueueManager {
      * Add a job to a specific queue
      */
     async addJob(queueName, jobType, data, options = {}) {
+        if (!this.enabled) {
+            this.logger.debug('Queue Manager disabled - job not added', { queueName, jobType });
+            return null;
+        }
+        
         try {
             if (!this.isInitialized) {
                 throw new Error('Queue Manager not initialized');
