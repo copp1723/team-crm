@@ -112,7 +112,8 @@ export class TeamCRMServer {
             this.setupOrchestratorEvents();
             
             const port = this.config.interface?.webInterface?.port || 8080;
-            const host = this.config.interface?.webInterface?.host || 'localhost';
+            // In production, bind to 0.0.0.0 for Render
+            const host = process.env.NODE_ENV === 'production' ? '0.0.0.0' : (this.config.interface?.webInterface?.host || 'localhost');
             
             console.log(`Attempting to listen on ${host}:${port}`);
             
