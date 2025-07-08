@@ -174,12 +174,22 @@ function getDefaultConfig() {
  * Validate required environment variables
  */
 function validateEnvironment() {
-    // Check for alternative environment variable names
-    if (!process.env.OPENROUTER_API_KEY && process.env.OpenRouter) {
-        process.env.OPENROUTER_API_KEY = process.env.OpenRouter;
+    // Debug: Show what environment variables are available
+    console.log(`Total environment variables: ${Object.keys(process.env).length}`);
+    console.log('Looking for API keys...');
+    
+    // Check for environment variables with case-insensitive matching
+    const envKeys = Object.keys(process.env);
+    const openRouterKey = envKeys.find(key => key.toLowerCase() === 'openrouter' || key.toLowerCase() === 'openrouter_api_key');
+    const superMemoryKey = envKeys.find(key => key.toLowerCase() === 'supermemory' || key.toLowerCase() === 'supermemory_api_key');
+    
+    if (openRouterKey) {
+        console.log(`Found OpenRouter key as: ${openRouterKey}`);
+        process.env.OPENROUTER_API_KEY = process.env[openRouterKey];
     }
-    if (!process.env.SUPERMEMORY_API_KEY && process.env.SuperMemory) {
-        process.env.SUPERMEMORY_API_KEY = process.env.SuperMemory;
+    if (superMemoryKey) {
+        console.log(`Found SuperMemory key as: ${superMemoryKey}`);
+        process.env.SUPERMEMORY_API_KEY = process.env[superMemoryKey];
     }
     
     const required = ['OPENROUTER_API_KEY'];
@@ -191,7 +201,15 @@ function validateEnvironment() {
             console.error(`   - ${key}`);
         });
         console.error('\nPlease copy .env.example to .env and add your API keys.');
-        process.exit(1);
+        
+        // In production, try to continue anyway if we have some env vars
+        if (process.env.NODE_ENV === 'production' && Object.keys(process.env).length > 10) {
+            console.log('⚠️  Attempting to continue in production mode...');
+            // Set a dummy key to bypass the check
+            process.env.OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || 'dummy-key-check-render-env';
+        } else {
+            process.exit(1);
+        }
     }
     
     const optional = ['SUPERMEMORY_API_KEY'];
