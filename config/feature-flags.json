@@ -1,0 +1,60 @@
+{
+  "aiModelOptimization": {
+    "description": "Enable AI model selection optimization",
+    "defaultValue": false,
+    "enabled": true,
+    "rollout": {
+      "type": "percentage",
+      "stages": [
+        { "percentage": 10, "startDate": "2024-01-01" },
+        { "percentage": 25, "startDate": "2024-01-15" },
+        { "percentage": 50, "startDate": "2024-02-01" },
+        { "percentage": 100, "startDate": "2024-03-01" }
+      ]
+    }
+  },
+  "promptOptimization": {
+    "description": "Enable intelligent prompt optimization",
+    "defaultValue": false,
+    "enabled": true,
+    "experiment": {
+      "name": "prompt_optimization_test",
+      "variants": [
+        { "name": "control", "weight": 50, "value": false },
+        { "name": "optimized", "weight": 50, "value": true }
+      ],
+      "metrics": ["response_quality", "token_usage", "response_time"]
+    }
+  },
+  "pluginSystem": {
+    "description": "Enable plugin system for extensibility",
+    "defaultValue": false,
+    "enabled": true,
+    "conditions": [
+      {
+        "attribute": "environment",
+        "operator": "in",
+        "value": ["development", "staging"],
+        "value": true
+      }
+    ]
+  },
+  "hotReload": {
+    "description": "Enable hot configuration reloading",
+    "defaultValue": true,
+    "enabled": true
+  },
+  "advancedLogging": {
+    "description": "Enable advanced structured logging",
+    "defaultValue": false,
+    "enabled": true,
+    "conditions": [
+      {
+        "attribute": "user.role",
+        "operator": "equals",
+        "value": "admin",
+        "value": true
+      }
+    ]
+  }
+}

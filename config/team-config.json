@@ -1,0 +1,154 @@
+{
+  "team": {
+    "name": "AI Sales Team",
+    "members": {
+      "joe": {
+        "id": "joe",
+        "name": "Joe",
+        "role": "Co-Founder & Senior Sales Consultant",
+        "focus_areas": [
+          "dealer_relationships",
+          "strategic_accounts",
+          "pilot_success",
+          "expansion_sales"
+        ],
+        "extraction_priorities": [
+          "dealer_feedback",
+          "relationship_building",
+          "pilot_metrics",
+          "upsell_opportunities"
+        ],
+        "ai_model": "claude-3-sonnet"
+      },
+      "charlie": {
+        "id": "charlie",
+        "name": "Charlie",
+        "role": "Co-Founder & Senior Sales Consultant",
+        "focus_areas": [
+          "new_dealer_acquisition",
+          "relationship_management",
+          "strategic_partnerships",
+          "pilot_conversions"
+        ],
+        "extraction_priorities": [
+          "dealer_engagement",
+          "trust_building",
+          "competitive_positioning",
+          "expansion_potential"
+        ],
+        "ai_model": "claude-3-sonnet"
+      },
+      "tre": {
+        "id": "tre",
+        "name": "Tre Johnson",
+        "role": "VP Sales",
+        "focus_areas": [
+          "dealer_relationships",
+          "sales_activities"
+        ],
+        "extraction_priorities": [
+          "dealer_feedback",
+          "meeting_notes",
+          "action_items"
+        ],
+        "ai_model": "claude-3-sonnet"
+      },
+      "josh": {
+        "id": "josh",
+        "name": "Josh (Super Admin)",
+        "role": "System Administrator",
+        "focus_areas": [
+          "dealer_relationships",
+          "sales_activities"
+        ],
+        "extraction_priorities": [
+          "dealer_feedback",
+          "meeting_notes",
+          "action_items"
+        ],
+        "ai_model": "claude-3-sonnet"
+      }
+    },
+    "executives": [
+      {
+        "id": "tre",
+        "name": "Tre",
+        "role": "Founder & CEO",
+        "summary_style": "strategic_focus",
+        "priority_areas": [
+          "dealer_growth",
+          "product_adoption",
+          "market_penetration",
+          "team_velocity"
+        ],
+        "ai_model": "claude-3-opus"
+      },
+      {
+        "id": "josh",
+        "name": "Josh (Super Admin)",
+        "role": "System Administrator",
+        "summary_style": "strategic_focus",
+        "priority_areas": [
+          "team_performance",
+          "deal_pipeline",
+          "strategic_decisions"
+        ],
+        "ai_model": "claude-3-opus"
+      }
+    ]
+  },
+  "ai_configuration": {
+    "models": {
+      "extraction": "claude-3-sonnet",
+      "analysis": "gpt-4-turbo",
+      "summary": "claude-3-opus"
+    },
+    "processing": {
+      "batch_interval": 300,
+      "memory_retention_days": 30,
+      "priority_threshold": 0.7
+    }
+  },
+  "business_rules": {
+    "high_priority_keywords": [
+      "urgent",
+      "critical",
+      "deadline",
+      "dealer",
+      "dealership",
+      "pilot",
+      "churn"
+    ],
+    "executive_alert_conditions": [
+      "high_priority",
+      "dealer_at_risk",
+      "pilot_decision",
+      "competitor_threat"
+    ],
+    "auto_categorization": {
+      "dealer_updates": [
+        "dealer",
+        "dealership",
+        "GM",
+        "general manager",
+        "owner",
+        "meeting",
+        "demo"
+      ],
+      "implementation_status": [
+        "integration",
+        "training",
+        "go-live",
+        "deployment",
+        "API"
+      ],
+      "expansion_opportunities": [
+        "multi-rooftop",
+        "sister store",
+        "dealer group",
+        "upsell",
+        "add-on"
+      ]
+    }
+  }
+}
