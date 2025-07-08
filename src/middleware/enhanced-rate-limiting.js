@@ -62,14 +62,18 @@ export class EnhancedRateLimitingMiddleware {
     async initialize() {
         try {
             await this.rateLimiter.initialize();
-            this.logger.info('Enhanced Rate Limiting initialized successfully');
             
-            // Start background tasks
-            this.startBackgroundTasks();
+            if (this.rateLimiter.enabled) {
+                this.logger.info('Enhanced Rate Limiting initialized successfully');
+                // Start background tasks
+                this.startBackgroundTasks();
+            } else {
+                this.logger.info('Enhanced Rate Limiting running in bypass mode - Redis not available');
+            }
             
         } catch (error) {
             this.logger.error('Failed to initialize Enhanced Rate Limiting', { error });
-            throw error;
+            // Don't throw - allow app to continue without rate limiting
         }
     }
     
@@ -77,6 +81,11 @@ export class EnhancedRateLimitingMiddleware {
      * Create smart rate limiting middleware with multiple layers
      */
     createSmartMiddleware(configName = 'api', options = {}) {
+        // If rate limiter is not enabled, return a no-op middleware
+        if (!this.rateLimiter.enabled) {
+            return (req, res, next) => next();
+        }
+        
         return async (req, res, next) => {
             const startTime = Date.now();
             

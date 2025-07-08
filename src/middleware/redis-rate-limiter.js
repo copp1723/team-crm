@@ -8,18 +8,28 @@ import { logger } from '../utils/logger.js';
 
 export class RedisRateLimiter {
     constructor(options = {}) {
-        this.redisConfig = {
-            host: options.redisHost || process.env.REDIS_HOST || 'localhost',
-            port: options.redisPort || process.env.REDIS_PORT || 6379,
-            password: options.redisPassword || process.env.REDIS_PASSWORD,
-            db: options.redisDb || process.env.REDIS_DB || 1, // Use different DB than BullMQ
-            maxRetriesPerRequest: 3,
-            retryDelayOnFailover: 100,
-            lazyConnect: true
-        };
-        
-        this.redis = new Redis(this.redisConfig);
+        this.enabled = false;
         this.logger = logger.child({ component: 'RedisRateLimiter' });
+        
+        // Check if Redis is available
+        if (process.env.REDIS_URL || process.env.REDIS_HOST || options.redisHost) {
+            this.redisConfig = process.env.REDIS_URL ? 
+                process.env.REDIS_URL : 
+                {
+                    host: options.redisHost || process.env.REDIS_HOST || 'localhost',
+                    port: options.redisPort || process.env.REDIS_PORT || 6379,
+                    password: options.redisPassword || process.env.REDIS_PASSWORD,
+                    db: options.redisDb || process.env.REDIS_DB || 1,
+                    maxRetriesPerRequest: 3,
+                    retryDelayOnFailover: 100,
+                    lazyConnect: true
+                };
+            
+            this.redis = new Redis(this.redisConfig);
+            this.enabled = true;
+        } else {
+            this.logger.warn('Redis not configured - rate limiting disabled');
+        }
         
         // Default rate limiting configurations
         this.defaultConfigs = {
@@ -89,6 +99,11 @@ export class RedisRateLimiter {
      * Initialize the rate limiter
      */
     async initialize() {
+        if (!this.enabled) {
+            this.logger.info('Redis Rate Limiter skipped - Redis not configured');
+            return;
+        }
+        
         try {
             await this.redis.ping();
             this.logger.info('Redis Rate Limiter initialized successfully');
@@ -98,7 +113,8 @@ export class RedisRateLimiter {
             
         } catch (error) {
             this.logger.error('Failed to initialize Redis Rate Limiter', { error });
-            throw error;
+            this.enabled = false;
+            // Don't throw - allow app to continue without rate limiting
         }
     }
     
@@ -188,6 +204,11 @@ export class RedisRateLimiter {
      * Create rate limiting middleware
      */
     createMiddleware(configName = 'api') {
+        // If Redis is not enabled, return a no-op middleware
+        if (!this.enabled) {
+            return (req, res, next) => next();
+        }
+        
         const config = this.defaultConfigs[configName];
         if (!config) {
             throw new Error(`Rate limit configuration '${configName}' not found`);
