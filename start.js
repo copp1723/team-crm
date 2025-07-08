@@ -174,6 +174,14 @@ function getDefaultConfig() {
  * Validate required environment variables
  */
 function validateEnvironment() {
+    // Check for alternative environment variable names
+    if (!process.env.OPENROUTER_API_KEY && process.env.OpenRouter) {
+        process.env.OPENROUTER_API_KEY = process.env.OpenRouter;
+    }
+    if (!process.env.SUPERMEMORY_API_KEY && process.env.SuperMemory) {
+        process.env.SUPERMEMORY_API_KEY = process.env.SuperMemory;
+    }
+    
     const required = ['OPENROUTER_API_KEY'];
     const missing = required.filter(key => !process.env[key]);
     
