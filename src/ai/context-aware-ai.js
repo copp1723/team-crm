@@ -59,10 +59,15 @@ export class ContextAwareAI {
     async initialize() {
         try {
             await this.memoryEngine.initialize();
-            this.logger.info('Context-Aware AI system initialized successfully');
+            
+            if (this.memoryEngine.enabled) {
+                this.logger.info('Context-Aware AI system initialized successfully with memory');
+            } else {
+                this.logger.info('Context-Aware AI system initialized without memory (Redis not available)');
+            }
         } catch (error) {
             this.logger.error('Failed to initialize Context-Aware AI', { error });
-            throw error;
+            // Don't throw - allow app to continue
         }
     }
     

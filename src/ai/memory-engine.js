@@ -9,6 +9,12 @@ import { logger } from '../utils/logger.js';
 
 export class MemoryEngine {
     constructor(config = {}) {
+        this.enabled = false;
+        this.logger = logger.child({ component: 'MemoryEngine' });
+        
+        // Check if Redis is available
+        const hasRedis = process.env.REDIS_URL || process.env.REDIS_HOST || config.redisHost;
+        
         this.config = {
             redisHost: config.redisHost || process.env.REDIS_HOST || 'localhost',
             redisPort: config.redisPort || process.env.REDIS_PORT || 6379,
@@ -35,17 +41,20 @@ export class MemoryEngine {
             }
         };
         
-        this.redis = new Redis({
-            host: this.config.redisHost,
-            port: this.config.redisPort,
-            password: this.config.redisPassword,
-            db: this.config.redisDb,
-            maxRetriesPerRequest: 3,
-            retryDelayOnFailover: 100,
-            lazyConnect: true
-        });
-        
-        this.logger = logger.child({ component: 'MemoryEngine' });
+        if (hasRedis) {
+            this.redis = new Redis({
+                host: this.config.redisHost,
+                port: this.config.redisPort,
+                password: this.config.redisPassword,
+                db: this.config.redisDb,
+                maxRetriesPerRequest: 3,
+                retryDelayOnFailover: 100,
+                lazyConnect: true
+            });
+            this.enabled = true;
+        } else {
+            this.logger.warn('Redis not configured - Memory Engine disabled');
+        }
         
         // Memory statistics
         this.stats = {
@@ -65,6 +74,11 @@ export class MemoryEngine {
      * Initialize the memory engine
      */
     async initialize() {
+        if (!this.enabled) {
+            this.logger.info('Memory Engine skipped - Redis not configured');
+            return;
+        }
+        
         try {
             await this.redis.ping();
             this.logger.info('Memory Engine initialized successfully');
@@ -77,7 +91,8 @@ export class MemoryEngine {
             
         } catch (error) {
             this.logger.error('Failed to initialize Memory Engine', { error });
-            throw error;
+            this.enabled = false;
+            // Don't throw - allow app to continue without memory
         }
     }
     
@@ -85,6 +100,10 @@ export class MemoryEngine {
      * Store a memory with context and metadata
      */
     async storeMemory(type, content, metadata = {}) {
+        if (!this.enabled) {
+            return { stored: false, reason: 'Memory Engine disabled' };
+        }
+        
         try {
             const memoryId = this.generateMemoryId(type);
             const timestamp = Date.now();
