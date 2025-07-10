@@ -301,6 +301,76 @@
             background: #666666;
         }
 
+        /* Analysis Results */
+        .analysis-results {
+            background: #ffffff;
+            border: 1px solid #e0e0e0;
+            margin-top: 40px;
+            margin-bottom: 40px;
+        }
+        
+        .results-header {
+            background: #f8f8f8;
+            padding: 16px 20px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .results-header h3 {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin: 0;
+        }
+        
+        .confidence {
+            font-size: 11px;
+            color: #666666;
+            text-transform: uppercase;
+        }
+        
+        .result-section {
+            padding: 20px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .result-section:last-child {
+            border-bottom: none;
+        }
+        
+        .result-section h4 {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+            color: #333333;
+        }
+        
+        .result-item {
+            padding: 8px 0;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        
+        .priority-1, .priority-2 { color: #cc0000; font-weight: 600; }
+        .priority-3 { color: #ff6600; font-weight: 600; }
+        .priority-4, .priority-5 { color: #666666; }
+        
+        .assignee {
+            font-size: 12px;
+            color: #666666;
+            text-transform: uppercase;
+        }
+        
+        .escalation {
+            background: #fff5f5;
+            border-left: 4px solid #cc0000;
+        }
+        
         /* Activity Log */
         .activity-log {
             background: #ffffff;
@@ -623,15 +693,21 @@
                     })
                 });
 
-                if (response.ok) {
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
                     showStatus('Update submitted successfully');
                     updateText.value = '';
                     updateText.dispatchEvent(new Event('input'));
                     
-                    // Add to activity log
-                    addToActivityLog('Update submitted');
+                    // Display the AI analysis results
+                    displayAnalysisResults(data);
+                    
+                    // Add to activity log with details
+                    addToActivityLog('Update processed', data);
                 } else {
-                    showStatus('Error submitting update', true);
+                    const errorMsg = data.error?.message || 'Error submitting update';
+                    showStatus(errorMsg, true);
                 }
             } catch (error) {
                 showStatus('Error connecting to server', true);
@@ -653,8 +729,66 @@
             }, 3000);
         }
 
+        // Display AI analysis results
+        function displayAnalysisResults(data) {
+            // Clear any existing results
+            const existingResults = document.querySelector('.analysis-results');
+            if (existingResults) {
+                existingResults.remove();
+            }
+            
+            // Create results container
+            const resultsDiv = document.createElement('div');
+            resultsDiv.className = 'analysis-results';
+            resultsDiv.innerHTML = `
+                <div class="results-header">
+                    <h3>ANALYSIS RESULTS</h3>
+                    <span class="confidence">CONFIDENCE: ${Math.round((data.analysis?.confidence || data.confidence || 0.7) * 100)}%</span>
+                </div>
+                
+                ${data.analysis?.actionItems?.length > 0 ? `
+                    <div class="result-section">
+                        <h4>ACTION ITEMS</h4>
+                        ${data.analysis.actionItems.map(item => `
+                            <div class="result-item">
+                                <span class="priority-${item.priority || 3}">P${item.priority || 3}</span>
+                                ${item.text} 
+                                ${item.assignee ? `<span class="assignee">[${item.assignee}]</span>` : ''}
+                            </div>
+                        `).join('')}
+                    </div>
+                ` : ''}
+                
+                ${data.analysis?.clients?.length > 0 ? `
+                    <div class="result-section">
+                        <h4>CLIENT INFORMATION</h4>
+                        ${data.analysis.clients.map(client => `
+                            <div class="result-item">
+                                <strong>${client.name}</strong> - ${client.status}
+                                ${client.dealValue ? ` ($${client.dealValue.toLocaleString()})` : ''}
+                            </div>
+                        `).join('')}
+                    </div>
+                ` : ''}
+                
+                ${data.analysis?.executiveEscalation?.required ? `
+                    <div class="result-section escalation">
+                        <h4>⚠️ EXECUTIVE ATTENTION REQUIRED</h4>
+                        <div class="result-item">${data.analysis.executiveEscalation.reason}</div>
+                    </div>
+                ` : ''}
+            `;
+            
+            // Insert results after the form
+            const formElement = document.querySelector('.update-form');
+            formElement.parentNode.insertBefore(resultsDiv, formElement.nextSibling);
+            
+            // Auto-scroll to results
+            resultsDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
         // Activity log
-        function addToActivityLog(text) {
+        function addToActivityLog(text, data = null) {
             const logContent = document.getElementById('activity-log');
             const now = new Date();
             const timeStr = now.toLocaleTimeString('en-US', { 
@@ -663,12 +797,21 @@
                 hour12: true 
             });
             
+            let aiInfo = 'AI processing...';
+            if (data && data.analysis) {
+                const itemCount = (data.analysis.actionItems?.length || 0) + 
+                                (data.analysis.clients?.length || 0) + 
+                                (data.analysis.priorities?.length || 0);
+                const confidence = Math.round((data.analysis.confidence || data.confidence || 0.7) * 100);
+                aiInfo = `${itemCount} items extracted • ${confidence}% confidence`;
+            }
+            
             const logItem = document.createElement('div');
             logItem.className = 'log-item';
             logItem.innerHTML = `
                 <div class="log-time">${timeStr}</div>
                 <div class="log-text">${text}</div>
-                <div class="ai-tags">AI processing...</div>
+                <div class="ai-tags">${aiInfo}</div>
             `;
             
             logContent.insertBefore(logItem, logContent.firstChild);
