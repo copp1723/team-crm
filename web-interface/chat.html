@@ -615,9 +615,11 @@
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        member: currentUser,
-                        update: updateContent,
-                        timestamp: new Date().toISOString()
+                        memberName: currentUser,
+                        updateText: updateContent,
+                        metadata: {
+                            timestamp: new Date().toISOString()
+                        }
                     })
                 });
 
@@ -682,7 +684,7 @@
 
         function initializeWebSocket() {
             const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-            const wsUrl = `${protocol}//${window.location.host}`;
+            const wsUrl = `${protocol}//${window.location.host}/realtime`;
             
             try {
                 ws = new WebSocket(wsUrl);
