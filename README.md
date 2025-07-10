@@ -1,124 +1,366 @@
-# Team CRM - Executive Awareness System
+# TeamCRM - AI-Augmented Team Intelligence System
 
-A modern, AI-powered system for busy executives to stay in the loop with their sales team's activities without the noise.
+A clean, executive-focused CRM system that transforms team updates into actionable intelligence through AI processing. Built for busy executives who need situational awareness without information overload.
 
-## Overview
+## 🎯 **Core Philosophy**
 
-Team CRM transforms unstructured team updates into actionable executive intelligence. Sales reps share their daily activities naturally, and AI extracts what matters for executive attention.
+**Clean. Minimal. Intelligent.**
 
-## Key Features
+TeamCRM eliminates the noise and delivers only what matters - critical situations requiring your attention and real-time team intelligence. No dashboards full of charts. No overwhelming metrics. Just the essential information you need to make decisions.
 
-- **Executive Dashboard**: Clean, stark interface showing only what requires attention
-- **Natural Language Input**: Team members write updates conversationally
-- **AI Intelligence**: Automatic extraction of priorities, risks, and opportunities
-- **Memory Integration**: Query past conversations with "What did I quote Acme last month?"
-- **Real-time Updates**: WebSocket-powered live activity feed
-- **Admin Interface**: Manage users and system settings without touching code
+## ✨ **Key Features**
 
-## Quick Start
+### **Executive Situational Awareness**
+- **Attention Items** - Only situations requiring executive intervention appear
+- **Team Activity Stream** - Real-time updates from your team with AI-extracted insights
+- **Direct Communication** - Message team members directly from the executive interface
 
-### Local Development
+### **Intelligent Processing**
+- **AI-Powered Extraction** - Automatically identifies priorities, risks, and opportunities
+- **Executive Escalation** - AI determines when situations need executive attention
+- **Natural Language Input** - Team members write naturally; AI handles the analysis
+
+### **Clean Design**
+- **Minimal Interface** - Black header, white background, essential information only
+- **Executive-Focused** - Designed for decision-makers, not data analysts
+- **Mobile Responsive** - Works seamlessly on all devices
+
+## 🚀 **Quick Start**
+
+### **Prerequisites**
+- Node.js 18+
+- Redis (for rate limiting and job queues)
+- OpenRouter API access (for AI processing)
+
+### **Installation**
+
+1. **Clone and Setup**
+   ```bash
+   git clone [repository-url]
+   cd team-crm
+   npm install
+   ```
+
+2. **Environment Configuration**
+   ```bash
+   cp .env.example .env
+   # Edit .env with your API keys and configuration
+   ```
+
+3. **Start the System**
+   ```bash
+   npm start
+   ```
+
+4. **Access Interfaces**
+   - **Team Input:** http://localhost:8080/chat
+   - **Executive Dashboard:** http://localhost:8080/executive-dashboard
+   - **API Documentation:** http://localhost:8080/api/docs
+
+## 🏗️ **System Architecture**
+
+```
+┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
+│   Team Input    │───▶│  AI Processing   │───▶│ Executive View  │
+│   Interface     │    │   Orchestrator   │    │   Dashboard     │
+└─────────────────┘    └──────────────────┘    └─────────────────┘
+         │                       │                       │
+         │                       ▼                       │
+         │              ┌─────────────────┐              │
+         └─────────────▶│  WebSocket      │◀─────────────┘
+                        │  Real-time      │
+                        │  Updates        │
+                        └─────────────────┘
+```
+
+### **Core Components**
+
+- **Team Orchestrator** - Central AI processing engine
+- **Executive Intelligence API** - Situational awareness and intervention detection
+- **Real-time Manager** - WebSocket-based live updates
+- **Enhanced Rate Limiting** - Redis-backed protection and analytics
+- **Team Collaboration** - Multi-room communication system
+
+## 📖 **Usage Guide**
+
+### **For Team Members**
+
+1. **Navigate to Team Input** (`/chat`)
+2. **Select Your Name** from the dropdown
+3. **Write Natural Updates** - No special formatting required
+   ```
+   Example: "Met with Acme Corp today. They're concerned about the 
+   implementation timeline and want to discuss a 6-month phased approach. 
+   The CEO seemed hesitant about our pricing but is very interested in 
+   the ROI projections we showed."
+   ```
+4. **Submit** - AI automatically extracts priorities and escalations
+
+### **For Executives**
+
+1. **Navigate to Executive Dashboard** (`/executive-dashboard`)
+2. **Review Attention Items** - Only critical situations appear here
+3. **Monitor Team Activity** - Real-time updates with AI insights
+4. **Direct Communication** - Use @mentions to message specific team members
+   ```
+   Examples:
+   @joe What's the latest on the Acme Corp timeline discussion?
+   @charlie Can you prepare a brief on the TechCo partnership opportunity?
+   ```
+
+## 🔧 **Configuration**
+
+### **Environment Variables**
 
 ```bash
-# Install dependencies
-npm install
+# Server Configuration
+PORT=8080
+NODE_ENV=production
 
-# Copy environment variables
-cp .env.example .env
-# Edit .env with your API keys
+# AI Processing
+OPENROUTER_API_KEY=your_openrouter_key
 
-# Start the server
-npm start
+# Redis (for rate limiting and jobs)
+REDIS_HOST=localhost
+REDIS_PORT=6379
+REDIS_PASSWORD=your_redis_password
+
+# Authentication (production)
+BASIC_AUTH_USER=admin
+BASIC_AUTH_PASSWORD=your_secure_password
 ```
 
-Access at:
-- Team Input: http://localhost:3000/chat
-- Executive Dashboard: http://localhost:3000/executive-dashboard
-- Admin Panel: http://localhost:3000/admin
+### **Team Configuration**
 
-### Deployment on Render
+Edit `config/team-config.json`:
 
-1. Push to GitHub
-2. Connect repository to Render
-3. Deploy using the included `render.yaml`
-4. Set environment variables in Render dashboard
-
-See [RENDER-DEPLOYMENT.md](RENDER-DEPLOYMENT.md) for detailed instructions.
-
-## Architecture
-
-```
-src/
-├── api/              # REST API endpoints
-├── ai/               # AI agents and processors
-├── core/             # Core business logic
-├── middleware/       # Express middleware
-├── websocket/        # Real-time communications
-└── team-crm-server.js # Main server file
-
-web-interface/
-├── chat.html         # Team input interface
-├── executive-dashboard.html # Executive view
-└── admin.html        # Admin interface
+```json
+{
+  "teamMembers": [
+    {
+      "key": "joe",
+      "name": "Joe Martinez",
+      "role": "Sales Director",
+      "expertise": ["enterprise_sales", "client_relations"]
+    },
+    {
+      "key": "charlie",
+      "name": "Charlie Chen", 
+      "role": "Business Development",
+      "expertise": ["partnerships", "technical_sales"]
+    }
+  ]
+}
 ```
 
-## Configuration
+## 🔌 **API Reference**
 
-System configuration via `config/team-config.json`:
-- Team member definitions
-- AI model selections
-- Business rules and thresholds
-- Integration settings
-
-## User Management
-
-Add users via admin interface or CLI:
+### **Core Endpoints**
 
 ```bash
-# Interactive mode
-node scripts/manage-users.js
+# Team Updates
+POST /api/update
+{
+  "memberName": "joe",
+  "updateText": "Your natural language update...",
+  "metadata": {}
+}
 
-# Direct commands
-node scripts/manage-users.js add sarah "Sarah Johnson" "Sales Executive"
-node scripts/manage-users.js set-executive sarah
+# Executive Intelligence
+GET /api/executive/attention      # Critical items requiring attention
+GET /api/executive/activity       # Real-time team activity feed
+POST /api/comments               # Send executive messages
 
-# Bulk import
-node scripts/bulk-import-users.js users.csv
+# System Status
+GET /health                      # System health check
+GET /api/status                  # Detailed system status
+GET /api/team                    # Team member information
 ```
 
-## Environment Variables
+### **WebSocket Events**
 
-Required:
-- `OPENROUTER_API_KEY` - For AI processing
-- `DATABASE_URL` - PostgreSQL connection
+```javascript
+// Subscribe to real-time updates
+ws.send(JSON.stringify({
+  type: 'subscribe',
+  channel: 'executive'  // or 'team-updates'
+}));
 
-Optional:
-- `SUPERMEMORY_API_KEY` - For conversation memory
-- `PORT` - Server port (default: 3000)
-- `NODE_ENV` - Set to 'production' for auth
+// Receive real-time events
+{
+  type: 'channel-broadcast',
+  channel: 'executive',
+  data: {
+    type: 'escalationCreated',
+    data: { /* escalation details */ }
+  }
+}
+```
 
-## Security
+## 🛡️ **Security Features**
 
-- Basic authentication in production
-- Executive-only access to admin panel
-- Secure password generation for all users
-- Environment-based configuration
+- **Rate Limiting** - Redis-backed smart rate limiting with behavior analysis
+- **Input Sanitization** - All inputs sanitized and validated
+- **Authentication** - Basic auth for production deployments
+- **CORS Protection** - Configurable cross-origin policies
+- **Request Size Limiting** - Prevents oversized requests
 
-## Design Philosophy
+## 📊 **Monitoring**
 
-- **No Emojis**: Professional, stark interface
-- **Signal over Noise**: Only surface what matters
-- **Executive Time**: Respect attention as scarce resource
-- **Natural Input**: Let sales reps write naturally
-- **Real Intelligence**: AI that understands business context
+### **Built-in Dashboards**
 
-## Support
+- **Rate Limit Monitor** - `/rate-limits` - Real-time rate limiting analytics
+- **Job Monitor** - `/jobs` - Background job processing status
+- **API Documentation** - `/api/docs` - Complete API reference
 
-For issues or questions:
-- Check API documentation at `/api/docs`
-- Review logs for debugging
-- Ensure all environment variables are set correctly
+### **Health Endpoints**
 
-## License
+```bash
+GET /health                      # Overall system health
+GET /api/jobs/stats             # Job processing statistics
+GET /admin/rate-limits/stats    # Rate limiting analytics
+```
 
-MIT License - See LICENSE file for details
+## 🚀 **Deployment**
+
+### **Production Deployment**
+
+1. **Set Environment Variables**
+   ```bash
+   NODE_ENV=production
+   PORT=8080
+   BASIC_AUTH_USER=admin
+   BASIC_AUTH_PASSWORD=secure_password
+   ```
+
+2. **Start with PM2** (recommended)
+   ```bash
+   npm install -g pm2
+   pm2 start start.js --name teamcrm
+   pm2 startup
+   pm2 save
+   ```
+
+3. **Or with Docker**
+   ```bash
+   docker build -t teamcrm .
+   docker run -p 8080:8080 --env-file .env teamcrm
+   ```
+
+### **Render.com Deployment**
+
+The system is pre-configured for Render.com deployment:
+
+1. Connect your GitHub repository
+2. Set environment variables in Render dashboard
+3. Deploy automatically on push to main branch
+
+## 🔧 **Development**
+
+### **Project Structure**
+
+```
+team-crm/
+├── src/
+│   ├── core/                    # Core orchestration logic
+│   ├── ai/                      # AI processing modules
+│   ├── api/                     # REST API endpoints
+│   ├── websocket/               # Real-time communication
+│   ├── middleware/              # Express middleware
+│   └── team-crm-server.js       # Main server entry point
+├── web-interface/               # Frontend interfaces
+│   ├── executive-dashboard.html # Clean executive interface
+│   ├── chat.html               # Team input interface
+│   └── admin.html              # Administrative interface
+├── config/                      # Configuration files
+├── docs/                       # Documentation
+└── public/                     # Static assets
+```
+
+### **Development Commands**
+
+```bash
+npm run dev                     # Development mode with auto-restart
+npm test                       # Run API tests
+npm run setup                  # Initial setup wizard
+```
+
+## 🤝 **Team Communication Patterns**
+
+### **Effective Update Examples**
+
+**✅ Good Updates:**
+```
+"Acme Corp meeting went well. They're interested in our enterprise package 
+but concerned about the $50K price point. CEO mentioned they're comparing 
+us with TechSolutions. I think we need to emphasize our ROI advantages. 
+Follow-up meeting scheduled for Friday."
+```
+
+**✅ What AI Extracts:**
+- Client: Acme Corp
+- Deal Status: Interested but price-sensitive
+- Competitor: TechSolutions
+- Action Item: Emphasize ROI advantages
+- Next Step: Friday follow-up meeting
+
+### **Executive Escalation Triggers**
+
+AI automatically escalates when it detects:
+- Deal values over $100K with risks
+- Client requests for executive meetings
+- Competitive threats requiring strategic response
+- Technical blockers affecting major deals
+- Timeline issues on critical projects
+
+## 🆘 **Troubleshooting**
+
+### **Common Issues**
+
+**Server Won't Start:**
+```bash
+# Check if port is in use
+lsof -i :8080
+# Kill conflicting process
+kill -9 [PID]
+```
+
+**AI Processing Fails:**
+- Verify OpenRouter API key is valid
+- Check rate limiting status at `/rate-limits`
+- Review logs for API errors
+
+**WebSocket Connection Issues:**
+- Ensure firewall allows WebSocket connections
+- Check for proxy/load balancer WebSocket support
+- Verify CORS configuration
+
+### **Support Commands**
+
+```bash
+# View system status
+curl http://localhost:8080/health
+
+# Check rate limits
+curl http://localhost:8080/admin/rate-limits/stats
+
+# View recent API activity
+curl http://localhost:8080/api/jobs/recent
+```
+
+## 📝 **License**
+
+MIT License - See LICENSE file for details.
+
+## 🚀 **What's Next**
+
+The system is designed to be:
+- **Extensible** - Easy to add new AI processors and team members
+- **Scalable** - Redis-backed components support clustering
+- **Maintainable** - Clean architecture with separated concerns
+
+Ready to transform your team communication into executive intelligence.
+
+---
+
+**Built for executives who value clarity over complexity.**

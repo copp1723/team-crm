@@ -642,17 +642,11 @@ export class TeamCRMServer {
         
         this.app.get('/chat', async (req, res) => {
             try {
-                const html = await fs.readFile(path.join(__dirname, '../web-interface/enhanced-chat.html'), 'utf8');
+                const html = await fs.readFile(path.join(__dirname, '../web-interface/chat.html'), 'utf8');
                 res.send(html);
             } catch (error) {
-                console.error('Error loading enhanced chat interface:', error);
-                // Fallback to basic chat
-                try {
-                    const fallbackHtml = await fs.readFile(path.join(__dirname, '../web-interface/chat.html'), 'utf8');
-                    res.send(fallbackHtml);
-                } catch (fallbackError) {
-                    res.status(500).send('Error loading chat interface');
-                }
+                console.error('Error loading chat interface:', error);
+                res.status(500).send('Error loading chat interface');
             }
         });
         
