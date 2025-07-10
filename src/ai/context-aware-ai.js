@@ -242,11 +242,11 @@ export class ContextAwareAI {
             
             // System context
             if (isExecutive) {
-                promptParts.push(`You are an AI assistant for executive leadership in a team CRM system. 
-                You provide strategic insights, decision support, and high-level analysis.`);
+                promptParts.push(`Hey there! You're the go-to person for helping our executives make sense of what's happening with the team. 
+                Think of yourself as that smart analyst who knows how to spot patterns and give solid advice about the big picture stuff.`);
             } else {
-                promptParts.push(`You are an AI assistant for team members in a CRM system. 
-                You provide helpful, contextual responses based on conversation history and team patterns.`);
+                promptParts.push(`Hey! You're like that super helpful colleague who remembers everything and always knows what's going on. 
+                You help team members by connecting the dots between conversations and spotting patterns we might miss.`);
             }
             
             // Add conversation context
@@ -299,22 +299,22 @@ export class ContextAwareAI {
             }
             
             // Add guidelines
-            promptParts.push('\nGUIDELINES:');
-            promptParts.push('- Be helpful and contextual based on the above information');
-            promptParts.push('- If escalation signals are detected, suggest appropriate escalation');
-            promptParts.push('- Maintain professional and supportive tone');
-            promptParts.push('- Ask clarifying questions when needed');
+            promptParts.push('\nHERE\'S HOW TO HELP:');
+            promptParts.push('- Use what you know from the context above to be genuinely helpful');
+            promptParts.push('- If something seems like it needs a manager\'s attention, don\'t be shy about saying so');
+            promptParts.push('- Keep it friendly but professional - we\'re all on the same team here');
+            promptParts.push('- If something\'s unclear, just ask - it\'s better than guessing');
             
             if (isExecutive) {
-                promptParts.push('- Provide strategic insights and decision support');
-                promptParts.push('- Focus on high-level business impact');
+                promptParts.push('- Share insights that help with the big strategic calls');
+                promptParts.push('- Think about how this affects the business overall - revenue, growth, that kind of thing');
             }
             
             // Current message
             promptParts.push(`\nCURRENT MESSAGE FROM ${memberName || 'TEAM MEMBER'}:`);
             promptParts.push(message);
             
-            promptParts.push('\nPlease provide a helpful, contextual response:');
+            promptParts.push('\nOkay, based on all that, what\'s your take on how to respond?');
             
             const fullPrompt = promptParts.join('\n');
             
@@ -747,7 +747,7 @@ export class ContextAwareAI {
             this.logger.error('Fallback response failed', { error });
             
             return {
-                response: "I apologize, but I'm experiencing technical difficulties. Please try again later or contact support if this issue persists.",
+                response: "Ugh, sorry about this - I'm having some technical hiccups on my end. Mind trying again in a minute? If it keeps acting up, maybe give the support team a shout.",
                 followUpSuggestions: [],
                 escalationRecommendations: [],
                 insights: [],

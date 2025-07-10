@@ -547,9 +547,9 @@ export class MemoryEngine {
                 contextText = contextText.substring(0, maxContextLength) + '...\n';
             }
             
-            const prompt = `${contextText}Current message from ${memberName || 'team member'}: ${userMessage}
+            const prompt = `${contextText}Alright, so ${memberName || 'someone from the team'} just said: ${userMessage}
             
-Please provide a helpful, contextual response that takes into account the conversation history and team context above.`;
+Given what we've talked about before and what's been happening with the team, how would you respond to help them out?`;
             
             return prompt;
             

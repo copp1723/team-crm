@@ -20,6 +20,7 @@ import fs from 'fs/promises';
 import { TeamOrchestrator } from './core/orchestration/team-orchestrator.js';
 import { ExecutiveIntelligenceAPI } from './api/executive-intelligence-api.js';
 import { AdminAPI } from './api/admin-api.js';
+import { EnhancedAPIResponse } from './api/enhanced-api-response.js';
 import { ValidationMiddleware } from './middleware/validation.js';
 import { EnhancedRateLimitingMiddleware } from './middleware/enhanced-rate-limiting.js';
 import { setupAuth } from './middleware/auth.js';
@@ -40,6 +41,8 @@ export class TeamCRMServer {
         this.rateLimiter = null;
         this.realtimeManager = null;
         this.teamCollaboration = null;
+        this.actualPort = null;
+        this.actualHost = null;
         
         this.setupMiddleware();
         this.setupRoutes();
@@ -111,17 +114,19 @@ export class TeamCRMServer {
             // Setup orchestrator event handlers
             this.setupOrchestratorEvents();
             
-            const port = this.config.interface?.webInterface?.port || 8080;
+            const port = this.config.interface?.webInterface?.port || process.env.PORT || 8080;
             // In production, bind to 0.0.0.0 for Render
             const host = process.env.NODE_ENV === 'production' ? '0.0.0.0' : (this.config.interface?.webInterface?.host || 'localhost');
             
             console.log(`Attempting to listen on ${host}:${port}`);
             
             this.server.listen(port, host, () => {
-                console.log(`Team CRM Server running at http://${host}:${port}`);
-                console.log(`Team Input: http://${host}:${port}/chat`);
-                console.log(`Executive View: http://${host}:${port}/executive-dashboard`);
-                console.log(`API Docs: http://${host}:${port}/api/docs`);
+                this.actualPort = port;
+                this.actualHost = host === '0.0.0.0' ? 'localhost' : host;
+                console.log(`Team CRM Server running at http://${this.actualHost}:${this.actualPort}`);
+                console.log(`Team Input: http://${this.actualHost}:${this.actualPort}/chat`);
+                console.log(`Executive View: http://${this.actualHost}:${this.actualPort}/executive-dashboard`);
+                console.log(`API Docs: http://${this.actualHost}:${this.actualPort}/api/docs`);
             });
             
             this.server.on('error', (error) => {
@@ -162,7 +167,9 @@ export class TeamCRMServer {
         
         // Serve static files for web interface
         const webInterfacePath = path.join(__dirname, '../web-interface');
+        const publicPath = path.join(__dirname, '../public');
         this.app.use('/static', express.static(webInterfacePath));
+        this.app.use(express.static(publicPath)); // Serve favicon and other static assets
         
         // Request logging
         this.app.use((req, res, next) => {
@@ -197,10 +204,25 @@ export class TeamCRMServer {
         // Health check
         this.app.get('/health', async (req, res) => {
             try {
-                const health = this.orchestrator ? await this.orchestrator.healthCheck() : { status: 'initializing' };
-                res.json(health);
+                const health = this.orchestrator ? await this.orchestrator.healthCheck() : { 
+                    status: 'initializing',
+                    components: {
+                        ai: { status: 'initializing' },
+                        database: { status: 'unknown' },
+                        memory: { 
+                            heapUsed: process.memoryUsage().heapUsed,
+                            uptime: process.uptime()
+                        }
+                    }
+                };
+                
+                const response = EnhancedAPIResponse.createHealthResponse(health);
+                res.json(response);
             } catch (error) {
-                res.status(500).json({ status: 'error', message: error.message });
+                const errorResponse = EnhancedAPIResponse.createError(error, {
+                    endpoint: '/health'
+                });
+                res.status(500).json(errorResponse);
             }
         });
         
@@ -226,26 +248,69 @@ export class TeamCRMServer {
         
         // Process team update
         this.app.post('/api/update', ValidationMiddleware.validateTeamUpdate, async (req, res) => {
+            const startTime = Date.now();
+            const requestId = `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+            
             try {
                 const { memberName, updateText, metadata } = req.body;
                 
+                console.log(`[${requestId}] Processing update from ${memberName}`);
+                
                 if (!this.orchestrator) {
-                    return res.status(503).json({ 
-                        error: 'System not ready. Please try again.' 
-                    });
+                    const error = new Error('System not ready. Please try again in a moment.');
+                    return res.status(503).json(
+                        EnhancedAPIResponse.createError(error, {
+                            memberName,
+                            requestId,
+                            endpoint: '/api/update'
+                        })
+                    );
                 }
                 
+                // Process the update with enhanced error handling
                 const result = await this.orchestrator.processTeamUpdate(
                     memberName, 
                     updateText, 
                     metadata || {}
                 );
                 
-                res.json(result);
+                console.log(`[${requestId}] Update processed successfully in ${Date.now() - startTime}ms`);
+                
+                // Return enhanced response
+                const response = EnhancedAPIResponse.createUpdateSuccess(result);
+                res.json(response);
+                
+                // Emit real-time update
+                if (this.realtimeManager) {
+                    this.realtimeManager.broadcastToChannel('team-updates', {
+                        type: 'updateProcessed',
+                        data: {
+                            memberName: result.memberName,
+                            updateId: result.updateId,
+                            extractedItems: result.extracted?.totalItems || 0,
+                            confidence: result.confidence || 0.5,
+                            hasEscalation: result.extracted?.detailedAnalysis?.executiveEscalation?.required || false
+                        },
+                        timestamp: new Date().toISOString()
+                    });
+                }
                 
             } catch (error) {
-                console.error('Error processing update:', error);
-                res.status(500).json({ error: error.message });
+                const processingTime = Date.now() - startTime;
+                console.error(`[${requestId}] Error processing update (${processingTime}ms):`, error);
+                
+                const errorResponse = EnhancedAPIResponse.createError(error, {
+                    memberName: req.body.memberName,
+                    requestId,
+                    endpoint: '/api/update'
+                });
+                
+                // Determine appropriate status code based on error type
+                const statusCode = error.message.includes('validation') ? 400 :
+                                 error.message.includes('timeout') ? 408 :
+                                 error.message.includes('API') ? 503 : 500;
+                
+                res.status(statusCode).json(errorResponse);
             }
         });
         
@@ -577,11 +642,17 @@ export class TeamCRMServer {
         
         this.app.get('/chat', async (req, res) => {
             try {
-                const html = await fs.readFile(path.join(__dirname, '../web-interface/chat.html'), 'utf8');
+                const html = await fs.readFile(path.join(__dirname, '../web-interface/enhanced-chat.html'), 'utf8');
                 res.send(html);
             } catch (error) {
-                console.error('Error loading chat interface:', error);
-                res.status(500).send('Error loading chat interface');
+                console.error('Error loading enhanced chat interface:', error);
+                // Fallback to basic chat
+                try {
+                    const fallbackHtml = await fs.readFile(path.join(__dirname, '../web-interface/chat.html'), 'utf8');
+                    res.send(fallbackHtml);
+                } catch (fallbackError) {
+                    res.status(500).send('Error loading chat interface');
+                }
             }
         });
         
@@ -974,6 +1045,20 @@ export class TeamCRMServer {
     </script>
 </body>
 </html>`;
+    }
+    
+    /**
+     * Get the actual port the server is running on
+     */
+    getPort() {
+        return this.actualPort || process.env.PORT || 8080;
+    }
+    
+    /**
+     * Get the actual host the server is running on
+     */
+    getHost() {
+        return this.actualHost || 'localhost';
     }
     
     /**

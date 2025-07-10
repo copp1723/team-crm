@@ -1,0 +1,17 @@
+{
+  "name": "Team CRM - AI Intelligence Platform",
+  "short_name": "Team CRM",
+  "description": "AI-powered internal sales intelligence system",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

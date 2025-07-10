@@ -292,11 +292,15 @@ async function main() {
         // Start the server
         await server.start();
         
+        // Get the actual port the server is running on
+        const actualPort = server.getPort();
+        const actualHost = server.getHost();
+        
         console.log('\n✅ Team CRM Foundation is running!');
         console.log('\n📋 Quick Start:');
-        console.log('   1. Visit http://localhost:3000/chat to submit team updates');
-        console.log('   2. View http://localhost:3000/executive-dashboard for executive awareness');
-        console.log('   3. Use the API at http://localhost:3000/api/docs for programmatic access');
+        console.log(`   1. Visit http://${actualHost}:${actualPort}/chat to submit team updates`);
+        console.log(`   2. View http://${actualHost}:${actualPort}/executive-dashboard for executive awareness`);
+        console.log(`   3. Use the API at http://${actualHost}:${actualPort}/api/docs for programmatic access`);
         console.log('\n💡 Press Ctrl+C to stop the server');
         
     } catch (error) {

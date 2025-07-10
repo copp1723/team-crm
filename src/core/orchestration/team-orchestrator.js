@@ -10,7 +10,7 @@
  * - Provides API endpoints for team input
  */
 
-import { PersonalAssistant } from '../agents/simple-personal-assistant.js';
+import { PersonalAssistant } from '../agents/enhanced-personal-assistant.js';
 import { MasterExecutiveAgent } from '../agents/simple-master-agent.js';
 import { EnhancedMemoryIntegration } from '../memory/enhanced-memory-integration.js';
 import { TeamNotificationSystem } from '../notifications/team-notification-system.js';
