@@ -329,5 +329,23 @@ export class ExecutiveIntelligenceAPI {
 
             res.json({ success: true, activity });
         });
+
+        // Clean dashboard endpoints
+        app.get('/api/executive/attention', (req, res) => {
+            res.json({
+                success: true,
+                data: this.interventions
+            });
+        });
+
+        app.get('/api/executive/activity', (req, res) => {
+            res.json({
+                success: true,
+                data: this.teamActivity.map(activity => ({
+                    ...activity,
+                    updateText: activity.summary
+                }))
+            });
+        });
     }
 }

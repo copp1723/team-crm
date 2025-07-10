@@ -276,7 +276,7 @@ export class DatabasePool {
                 }
             }, delay);
         } else {
-            console.error('Max reconnection attempts reached. Manual intervention required.');
+            console.error('We\'ve tried reconnecting a bunch of times but no luck. Might need someone to take a look at the database connection.');
         }
     }
     

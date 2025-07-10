@@ -422,7 +422,7 @@
             <div class="form-group">
                 <label class="form-label" for="memberSelect">Team Member</label>
                 <select id="memberSelect" class="form-select">
-                    <option value="">Select your name...</option>
+                    <option value="">Who's sharing today?</option>
                 </select>
             </div>
 
@@ -431,7 +431,7 @@
                 <textarea 
                     id="updateText" 
                     class="form-textarea"
-                    placeholder="What's going on? Share client meetings, deal updates, concerns, deadlines, or anything else worth mentioning. Write naturally - no need to format anything special."
+                    placeholder="What's happening on your end? Share client meetings, deal progress, wins, concerns, or anything the team should know. Just write naturally - I'll take care of organizing everything."
                 ></textarea>
             </div>
 
@@ -441,16 +441,16 @@
 
             <div id="processingStatus" class="processing-status">
                 <div class="status-spinner"></div>
-                <span>Analyzing your update...</span>
+                <span>Reading through your update...</span>
             </div>
         </div>
 
         <!-- Results Section -->
         <div id="resultsSection" class="results-section">
             <div class="results-header">
-                <h2 class="section-title">What We Found</h2>
+                <h2 class="section-title">Here's What I Noticed</h2>
                 <div class="confidence-score">
-                    <span>Confidence:</span>
+                    <span>How confident:</span>
                     <div class="confidence-bar">
                         <div id="confidenceFill" class="confidence-fill"></div>
                     </div>
@@ -460,28 +460,28 @@
 
             <div class="analysis-grid">
                 <div class="analysis-card">
-                    <h3>✅ Things to Do</h3>
+                    <h3>✅ Action Items</h3>
                     <div id="actionItems"></div>
                 </div>
 
                 <div class="analysis-card">
-                    <h3>🏢 Client Updates</h3>
+                    <h3>🏢 Client Activity</h3>
                     <div id="clientInfo"></div>
                 </div>
 
                 <div class="analysis-card">
-                    <h3>🔥 Priority Items</h3>
+                    <h3>🔥 Things That Need Attention</h3>
                     <div id="priorities"></div>
                 </div>
 
                 <div class="analysis-card">
-                    <h3>💡 Key Points</h3>
+                    <h3>💡 Key Takeaways</h3>
                     <div id="insights"></div>
                 </div>
             </div>
 
             <div id="recommendations" class="recommendations" style="display: none;">
-                <h3>📝 What You Should Do</h3>
+                <h3>📝 Next Steps to Consider</h3>
                 <div id="recommendationsList"></div>
             </div>
         </div>
@@ -489,7 +489,7 @@
         <!-- Activity Log -->
         <div class="activity-section">
             <h2 class="section-title">Team Activity</h2>
-            <p class="section-subtitle">Recent updates from everyone</p>
+            <p class="section-subtitle">What the team's been up to</p>
             <div id="activityLog"></div>
         </div>
     </div>
@@ -525,7 +525,7 @@
                     const response = await fetch('/api/team');
                     const members = await response.json();
                     
-                    this.elements.memberSelect.innerHTML = '<option value="">Select your name...</option>';
+                    this.elements.memberSelect.innerHTML = '<option value="">Who\'s sharing today?</option>';
                     members.forEach(member => {
                         const option = document.createElement('option');
                         option.value = member.key || member.id;
@@ -534,7 +534,7 @@
                     });
                 } catch (error) {
                     console.error('Failed to load team members:', error);
-                    this.showStatus('Failed to load team members', true);
+                    this.showStatus('Couldn\'t load the team list - refresh and try again?', true);
                 }
             }
 
@@ -554,7 +554,7 @@
                     this.ws = new WebSocket(`${protocol}//${window.location.host}`);
                     
                     this.ws.onopen = () => {
-                        console.log('Connected to real-time updates');
+                        console.log('Connected to live team updates');
                         this.ws.send(JSON.stringify({
                             type: 'subscribe',
                             channel: 'team-updates'
@@ -571,11 +571,11 @@
                     };
                     
                     this.ws.onclose = () => {
-                        console.log('Disconnected from real-time updates');
+                        console.log('Lost connection to live updates - reconnecting...');
                         setTimeout(() => this.initWebSocket(), 5000);
                     };
                 } catch (error) {
-                    console.error('WebSocket connection failed:', error);
+                    console.error('Couldn\'t connect to live updates:', error);
                 }
             }
 
@@ -584,12 +584,12 @@
                 const updateText = this.elements.updateText.value.trim();
 
                 if (!memberName || !updateText) {
-                    this.showStatus('Please pick your name and write something', true);
+                    this.showStatus('Hey! Don\'t forget to pick your name and share what\'s happening', true);
                     return;
                 }
 
                 if (updateText.length < 10) {
-                    this.showStatus('Write a bit more - at least 10 characters', true);
+                    this.showStatus('Could you share a bit more detail? That\'ll help us understand better', true);
                     return;
                 }
 
@@ -606,7 +606,7 @@
 
                     if (response.ok && data.success) {
                         this.showResults(data);
-                        this.showStatus('Got it! Here\'s what we found.');
+                        this.showStatus('Thanks for sharing! Here\'s what I picked up on...');
                         this.elements.updateText.value = '';
                         this.addActivityItem(data);
                     } else {
@@ -616,11 +616,11 @@
                 } catch (error) {
                     this.handleError({
                         error: { 
-                            message: 'Network issue. Check your connection and try again.',
+                            message: 'Hmm, looks like there\'s a connection hiccup. Mind trying again?',
                             type: 'network_error'
                         },
                         support: {
-                            troubleshooting: ['Check your internet connection', 'Try again in a moment']
+                            troubleshooting: ['Give your internet a quick check', 'Let\'s try again in just a sec']
                         }
                     });
                 } finally {
@@ -630,7 +630,7 @@
 
             setProcessingState(processing) {
                 this.elements.submitBtn.disabled = processing;
-                this.elements.submitBtn.textContent = processing ? 'Analyzing...' : 'Share Update';
+                this.elements.submitBtn.textContent = processing ? 'Reading...' : 'Share Update';
                 
                 if (processing) {
                     this.elements.processingStatus.classList.add('show');
@@ -657,10 +657,10 @@
                         <div class="analysis-item ${priorityClass}">
                             <div>${item.text}</div>
                             <div class="analysis-item-meta">
-                                Priority: ${item.priority}/5 | 
-                                Assignee: ${item.assignee || 'Unassigned'} |
-                                Confidence: ${Math.round((item.confidence || 0) * 100)}%
-                                ${item.deadline ? ` | Due: ${new Date(item.deadline).toLocaleDateString()}` : ''}
+                                Importance: ${item.priority}/5 | 
+                                Owner: ${item.assignee || 'No one yet'} |
+                                How sure: ${Math.round((item.confidence || 0) * 100)}%
+                                ${item.deadline ? ` | Due by: ${new Date(item.deadline).toLocaleDateString()}` : ''}
                             </div>
                         </div>
                     `;
@@ -674,9 +674,9 @@
                         <div class="analysis-item ${riskClass}">
                             <div><strong>${client.name}</strong> - ${client.status}</div>
                             <div class="analysis-item-meta">
-                                ${client.dealValue ? `Value: $${client.dealValue.toLocaleString()} | ` : ''}
-                                Risk: ${client.riskLevel || 'unknown'} |
-                                Confidence: ${Math.round((client.confidence || 0) * 100)}%
+                                ${client.dealValue ? `Deal size: $${client.dealValue.toLocaleString()} | ` : ''}
+                                Risk level: ${client.riskLevel || 'unclear'} |
+                                How sure: ${Math.round((client.confidence || 0) * 100)}%
                             </div>
                         </div>
                     `;
@@ -690,9 +690,9 @@
                         <div class="analysis-item ${urgencyClass}">
                             <div>${priority.item}</div>
                             <div class="analysis-item-meta">
-                                Urgency: ${priority.urgency} |
-                                Impact: ${priority.businessImpact} |
-                                Confidence: ${Math.round((priority.confidence || 0) * 100)}%
+                                How urgent: ${priority.urgency} |
+                                Business impact: ${priority.businessImpact} |
+                                How sure: ${Math.round((priority.confidence || 0) * 100)}%
                             </div>
                         </div>
                     `;
@@ -714,7 +714,7 @@
             updateAnalysisSection(elementId, items, formatter) {
                 const element = document.getElementById(elementId);
                 if (items.length === 0) {
-                    element.innerHTML = '<div class="analysis-item"><div style="color: #666;">Nothing specific found here</div></div>';
+                    element.innerHTML = '<div class="analysis-item"><div style="color: #666;">Nothing to highlight in this category</div></div>';
                 } else {
                     element.innerHTML = items.map(formatter).join('');
                 }
@@ -728,8 +728,8 @@
                         <div class="recommendation-item ${urgentClass}">
                             <div><strong>${rec.action}</strong></div>
                             <div class="analysis-item-meta">
-                                ${rec.reason ? `Reason: ${rec.reason}` : ''}
-                                ${rec.details ? ` | Details: ${rec.details.join(', ')}` : ''}
+                                ${rec.reason ? `Why: ${rec.reason}` : ''}
+                                ${rec.details ? ` | More info: ${rec.details.join(', ')}` : ''}
                             </div>
                         </div>
                     `;
@@ -739,7 +739,7 @@
             handleError(data) {
                 console.error('Update processing error:', data);
                 
-                let message = 'An error occurred while processing your update.';
+                let message = 'Oops, something went wrong. Let\'s try that again?';
                 let troubleshooting = [];
 
                 if (data.error) {
@@ -751,7 +751,7 @@
 
                 if (troubleshooting.length > 0) {
                     setTimeout(() => {
-                        this.showStatus(`Try: ${troubleshooting[0]}`, false);
+                        this.showStatus(`Maybe ${troubleshooting[0].toLowerCase()}?`, false);
                     }, 3000);
                 }
             }
@@ -775,11 +775,11 @@
                         <div class="activity-time">${time}</div>
                     </div>
                     <div class="activity-stats">
-                        ${data.extracted?.totalItems || 0} items extracted | 
-                        ${confidencePercent}% confidence | 
-                        ${data.metadata?.processingTime?.toFixed(1) || '?'}s processing
-                        ${hasEscalation ? ' | ⚠️ Executive escalation required' : ''}
-                        ${data.metadata?.fallbackUsed ? ' | Fallback processing used' : ''}
+                        Found ${data.extracted?.totalItems || 0} things to track | 
+                        ${confidencePercent}% sure about this | 
+                        Took ${data.metadata?.processingTime?.toFixed(1) || '?'}s to read
+                        ${hasEscalation ? ' | ⚠️ Leadership should know about this' : ''}
+                        ${data.metadata?.fallbackUsed ? ' | Had to use backup processing' : ''}
                     </div>
                 `;
 
@@ -818,13 +818,13 @@
                 activityItem.style.borderLeftColor = '#28a745';
                 activityItem.innerHTML = `
                     <div class="activity-header">
-                        <div class="activity-member">${data.memberName} (Live)</div>
+                        <div class="activity-member">${data.memberName} (Just now)</div>
                         <div class="activity-time">${time}</div>
                     </div>
                     <div class="activity-stats">
-                        ${data.extractedItems || 0} items extracted | 
-                        ${Math.round((data.confidence || 0) * 100)}% confidence
-                        ${data.hasEscalation ? ' | ⚠️ Executive escalation required' : ''}
+                        Found ${data.extractedItems || 0} things to track | 
+                        ${Math.round((data.confidence || 0) * 100)}% sure about this
+                        ${data.hasEscalation ? ' | ⚠️ Leadership should know about this' : ''}
                     </div>
                 `;
 

@@ -302,7 +302,7 @@ export class EnhancedAPIResponse {
             return {
                 type: 'ai_service_error',
                 code: 'AI_SERVICE_BUSY',
-                userMessage: 'The AI service is temporarily busy. Your update was saved and we\'ll process it as soon as possible.',
+                userMessage: 'The AI is taking a coffee break right now. Don\'t worry - your update is saved and we\'ll process it in just a moment!',
                 retryable: true,
                 estimatedRetryTime: '2-5 minutes',
                 severity: 'medium'
@@ -313,7 +313,7 @@ export class EnhancedAPIResponse {
             return {
                 type: 'timeout_error',
                 code: 'TOOK_TOO_LONG',
-                userMessage: 'Processing took longer than expected. Try breaking your update into smaller parts.',
+                userMessage: 'That took longer than we expected! Maybe try splitting your update into bite-sized chunks?',
                 retryable: true,
                 estimatedRetryTime: '30 seconds',
                 severity: 'low'
@@ -324,7 +324,7 @@ export class EnhancedAPIResponse {
             return {
                 type: 'validation_error',
                 code: 'INVALID_INPUT',
-                userMessage: 'Something\'s not right with the update format. Please check and try again.',
+                userMessage: 'Hmm, something looks off with the format. Double-check everything looks good and give it another go!',
                 retryable: false,
                 estimatedRetryTime: null,
                 severity: 'low'
@@ -334,7 +334,7 @@ export class EnhancedAPIResponse {
         return {
             type: 'system_error',
             code: 'SOMETHING_WENT_WRONG',
-            userMessage: 'Something unexpected happened. We\'ve been notified and will look into it.',
+            userMessage: 'Whoops! Something unexpected popped up. We\'re on it - give us a few minutes and try again.',
             retryable: true,
             estimatedRetryTime: '5-10 minutes',
             severity: 'high'
@@ -344,24 +344,24 @@ export class EnhancedAPIResponse {
     static getTroubleshootingSteps(errorType) {
         const steps = {
             'ai_service_error': [
-                'Wait a couple minutes and try again',
-                'Check your internet connection',
-                'Try a shorter update if yours was really long'
+                'Give it a minute or two - the AI might just be catching its breath',
+                'Double-check your internet is working smoothly',
+                'If your update was super long, maybe trim it down a bit'
             ],
             'timeout_error': [
-                'Break your update into smaller chunks',
-                'Try again with less text',
-                'Make sure your connection is stable'
+                'Try splitting your update into smaller, more digestible pieces',
+                'Keep it short and sweet - less text might help',
+                'Check that your internet isn\'t being flaky'
             ],
             'validation_error': [
-                'Make sure your update is between 10-10,000 characters',
-                'Remove any weird formatting or special characters',
-                'Double-check that you selected your name'
+                'Your update should be between 10 and 10,000 characters - not too short, not too long!',
+                'Try removing any funky formatting or special characters that might be causing issues',
+                'Make sure you\'ve selected your name from the dropdown'
             ],
             'system_error': [
-                'Wait a few minutes and try again',
-                'Check if others are having the same issue',
-                'Reach out to support if it keeps happening'
+                'Take a quick break and give it another shot in a few minutes',
+                'Ask around - are your teammates experiencing this too?',
+                'If this keeps happening, drop us a line and we\'ll help you out!'
             ]
         };
         
@@ -370,10 +370,10 @@ export class EnhancedAPIResponse {
     
     static getStatusDescription(status) {
         const descriptions = {
-            'queued': 'Update queued for processing',
-            'processing': 'AI analysis in progress',
-            'completed': 'Processing completed successfully',
-            'failed': 'Processing failed'
+            'queued': 'Your update is in line - we\'ll get to it shortly!',
+            'processing': 'The AI is working its magic on your update...',
+            'completed': 'All done! Your update has been processed.',
+            'failed': 'Uh oh, something went wrong processing your update'
         };
         
         return descriptions[status] || 'Unknown status';

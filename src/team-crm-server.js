@@ -395,7 +395,7 @@ export class TeamCRMServer {
                 const { userId, userInfo = {} } = req.body;
                 
                 if (!userId) {
-                    return res.status(400).json({ error: 'userId is required' });
+                    return res.status(400).json({ error: 'Hey, we need to know who you are! Mind providing your userId?' });
                 }
                 
                 const room = await this.teamCollaboration.joinRoom(roomId, userId, userInfo);
@@ -416,7 +416,7 @@ export class TeamCRMServer {
                 const { userId } = req.body;
                 
                 if (!userId) {
-                    return res.status(400).json({ error: 'userId is required' });
+                    return res.status(400).json({ error: 'Hey, we need to know who you are! Mind providing your userId?' });
                 }
                 
                 const success = await this.teamCollaboration.leaveRoom(roomId, userId);
@@ -437,7 +437,7 @@ export class TeamCRMServer {
                 const { userId, content, type = 'text', metadata = {} } = req.body;
                 
                 if (!userId || !content) {
-                    return res.status(400).json({ error: 'userId and content are required' });
+                    return res.status(400).json({ error: 'Looks like we\'re missing something! We need both your userId and some content to work with.' });
                 }
                 
                 const message = await this.teamCollaboration.sendMessage(roomId, userId, content, {
@@ -494,7 +494,7 @@ export class TeamCRMServer {
                 const { userId } = req.body;
                 
                 if (!userId) {
-                    return res.status(400).json({ error: 'userId is required' });
+                    return res.status(400).json({ error: 'Hey, we need to know who you are! Mind providing your userId?' });
                 }
                 
                 this.teamCollaboration.startTyping(roomId, userId);
@@ -515,7 +515,7 @@ export class TeamCRMServer {
                 const { userId } = req.body;
                 
                 if (!userId) {
-                    return res.status(400).json({ error: 'userId is required' });
+                    return res.status(400).json({ error: 'Hey, we need to know who you are! Mind providing your userId?' });
                 }
                 
                 this.teamCollaboration.stopTyping(roomId, userId);

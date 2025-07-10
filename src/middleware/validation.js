@@ -15,14 +15,14 @@ export class ValidationMiddleware {
             // Required field validation
             if (!memberName || typeof memberName !== 'string') {
                 return res.status(400).json({
-                    error: 'Invalid memberName: must be a non-empty string',
+                    error: 'Hey, looks like you forgot to tell us who you are. Mind selecting your name?',
                     code: 'INVALID_MEMBER_NAME'
                 });
             }
             
             if (!updateText || typeof updateText !== 'string') {
                 return res.status(400).json({
-                    error: 'Invalid updateText: must be a non-empty string',
+                    error: 'Hey, looks like your update was empty. Mind adding some content?',
                     code: 'INVALID_UPDATE_TEXT'
                 });
             }
@@ -30,21 +30,21 @@ export class ValidationMiddleware {
             // Length limits
             if (memberName.length > 100) {
                 return res.status(400).json({
-                    error: 'Member name too long (max 100 characters)',
+                    error: 'Whoa, that\'s a really long name! Let\'s keep it under 100 characters, okay?',
                     code: 'MEMBER_NAME_TOO_LONG'
                 });
             }
             
             if (updateText.length > 10000) {
                 return res.status(400).json({
-                    error: 'Update text too long (max 10,000 characters)',
+                    error: 'That\'s quite a novel you\'ve got there! How about we keep it under 10,000 characters? You could split it into multiple updates if needed.',
                     code: 'UPDATE_TEXT_TOO_LONG'
                 });
             }
             
             if (updateText.length < 10) {
                 return res.status(400).json({
-                    error: 'Update text too short (min 10 characters)',
+                    error: 'Could you add a bit more detail? We need at least 10 characters to make it worth processing.',
                     code: 'UPDATE_TEXT_TOO_SHORT'
                 });
             }
@@ -52,7 +52,7 @@ export class ValidationMiddleware {
             // Content validation
             if (ValidationMiddleware.containsSuspiciousContent(updateText)) {
                 return res.status(400).json({
-                    error: 'Update contains potentially harmful content',
+                    error: 'Hmm, something in your update triggered our safety filters. Could you rephrase it without special characters or code snippets?',
                     code: 'SUSPICIOUS_CONTENT'
                 });
             }
@@ -65,7 +65,7 @@ export class ValidationMiddleware {
             if (metadata) {
                 if (typeof metadata !== 'object' || Array.isArray(metadata)) {
                     return res.status(400).json({
-                        error: 'Invalid metadata: must be an object',
+                        error: 'The metadata format doesn\'t look quite right. It should be a simple object with key-value pairs.',
                         code: 'INVALID_METADATA'
                     });
                 }
@@ -74,7 +74,7 @@ export class ValidationMiddleware {
                 const metadataStr = JSON.stringify(metadata);
                 if (metadataStr.length > 5000) {
                     return res.status(400).json({
-                        error: 'Metadata too large (max 5,000 characters when serialized)',
+                        error: 'Your metadata is a bit hefty! Let\'s trim it down to under 5,000 characters total.',
                         code: 'METADATA_TOO_LARGE'
                     });
                 }
@@ -87,7 +87,7 @@ export class ValidationMiddleware {
         } catch (error) {
             console.error('Validation error:', error);
             res.status(500).json({
-                error: 'Internal validation error',
+                error: 'Oops, something went wrong on our end while checking your update. Give it another shot?',
                 code: 'VALIDATION_ERROR'
             });
         }
@@ -124,7 +124,7 @@ export class ValidationMiddleware {
             
             if (validRequests.length >= maxRequests) {
                 return res.status(429).json({
-                    error: 'Too many requests',
+                    error: 'Slow down there, speed demon! You\'re sending updates faster than we can handle. Take a breather and try again in a minute.',
                     code: 'RATE_LIMIT_EXCEEDED',
                     retryAfter: Math.ceil(windowMs / 1000)
                 });
@@ -170,7 +170,7 @@ export class ValidationMiddleware {
                 const sizeBytes = ValidationMiddleware.parseSize(maxSize);
                 if (parseInt(contentLength) > sizeBytes) {
                     return res.status(413).json({
-                        error: 'Request entity too large',
+                        error: 'That\'s a chunky request! We can only handle up to ' + maxSize + ' at a time. Maybe break it into smaller pieces?',
                         code: 'REQUEST_TOO_LARGE',
                         maxSize
                     });

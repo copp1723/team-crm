@@ -55,7 +55,7 @@ export class AdminAPI {
                 const { username, name, role, isExecutive } = req.body;
 
                 if (!username || !name || !role) {
-                    return res.status(400).json({ error: 'Username, name, and role are required' });
+                    return res.status(400).json({ error: 'Hey there! We need the username, name, and role to create a new user. Mind filling those in?' });
                 }
 
                 const config = await this.loadConfig();
@@ -113,7 +113,7 @@ export class AdminAPI {
                 const config = await this.loadConfig();
 
                 if (!config.team.members[username]) {
-                    return res.status(404).json({ error: 'User not found' });
+                    return res.status(404).json({ error: 'Hmm, can\'t find that user. Double-check the username?' });
                 }
 
                 // Update member info
@@ -155,7 +155,7 @@ export class AdminAPI {
                 const config = await this.loadConfig();
 
                 if (!config.team.members[username]) {
-                    return res.status(404).json({ error: 'User not found' });
+                    return res.status(404).json({ error: 'Hmm, can\'t find that user. Double-check the username?' });
                 }
 
                 // Remove from members
@@ -380,7 +380,7 @@ export class AdminAPI {
     requireAdminAuth(req, res, next) {
         // Check if user is authenticated and is an executive
         if (!req.auth || req.auth.user !== 'tre') {
-            return res.status(403).json({ error: 'Admin access required' });
+            return res.status(403).json({ error: 'Hold up! You need admin privileges for this. Are you logged in as an admin?' });
         }
         next();
     }

@@ -275,28 +275,7 @@
         <!-- Requires Your Attention -->
         <section class="attention-section">
             <ul class="attention-items" id="attention-list">
-                <li class="attention-item">
-                    <div class="attention-bullet"></div>
-                    <div class="attention-content">
-                        <div class="attention-text">
-                            Acme Dealership pushing back on pricing. They want executive discussion on terms. Deal stalled 5 days.
-                        </div>
-                        <div class="attention-meta">
-                            Joe Martinez • 2 hours ago • Acme Dealership
-                        </div>
-                    </div>
-                </li>
-                <li class="attention-item">
-                    <div class="attention-bullet"></div>
-                    <div class="attention-content">
-                        <div class="attention-text">
-                            TechAuto CEO wants strategic partnership discussion. Potential 3-year exclusive arrangement.
-                        </div>
-                        <div class="attention-meta">
-                            Charlie Chen • 4 hours ago • TechAuto Group
-                        </div>
-                    </div>
-                </li>
+                <!-- Attention items will be loaded here -->
             </ul>
         </section>
 
@@ -304,47 +283,7 @@
         <div class="main-grid">
             <section class="activity-stream">
                 <div class="stream-content" id="activity-stream">
-                    <div class="stream-item">
-                        <div class="member-initial">J</div>
-                        <div class="stream-details">
-                            <div class="stream-header-info">
-                                <span class="member-name">Joe Martinez</span>
-                                <span class="stream-time">31 min ago</span>
-                            </div>
-                            <p class="stream-text">
-                                Sunrise Ford pilot showing 40% reduction in service no-shows. GM wants to expand to their Chevy store. 
-                                They're currently paying CDK $8k/month and not happy with the support.
-                            </p>
-                        </div>
-                    </div>
-
-                    <div class="stream-item">
-                        <div class="member-initial">C</div>
-                        <div class="stream-details">
-                            <div class="stream-header-info">
-                                <span class="member-name">Charlie Chen</span>
-                                <span class="stream-time">1 hour ago</span>
-                            </div>
-                            <p class="stream-text">
-                                Demo'd to AutoNation group today. 15 stores in region. They asked specifically about our AI 
-                                appointment scheduler vs TrueCar's solution. Pilot starting at flagship store next week.
-                            </p>
-                        </div>
-                    </div>
-
-                    <div class="stream-item">
-                        <div class="member-initial">J</div>
-                        <div class="stream-details">
-                            <div class="stream-header-info">
-                                <span class="member-name">Joe Martinez</span>
-                                <span class="stream-time">2 hours ago</span>
-                            </div>
-                            <p class="stream-text">
-                                Metro Motors asking about multi-location deployment. They have 6 dealerships. 
-                                Main concern is data integration with their DMS. Need technical discussion on API capabilities.
-                            </p>
-                        </div>
-                    </div>
+                    <!-- Activity items will be loaded here -->
                 </div>
             </section>
 
@@ -517,8 +456,69 @@
             }
         });
 
+        // Load initial data
+        async function loadInitialData() {
+            try {
+                // Load attention items
+                const attentionResponse = await fetch('/api/executive/attention');
+                if (attentionResponse.ok) {
+                    const attentionData = await attentionResponse.json();
+                    if (attentionData.success && attentionData.data) {
+                        const attentionList = document.getElementById('attention-list');
+                        attentionList.innerHTML = attentionData.data.map(item => `
+                            <li class="attention-item">
+                                <div class="attention-bullet"></div>
+                                <div class="attention-content">
+                                    <div class="attention-text">${item.description || item.summary}</div>
+                                    <div class="attention-meta">
+                                        ${item.member || 'System'} • ${formatTimeAgo(item.timestamp)} • ${item.client || 'Alert'}
+                                    </div>
+                                </div>
+                            </li>
+                        `).join('');
+                    }
+                }
+
+                // Load recent activity
+                const activityResponse = await fetch('/api/executive/activity');
+                if (activityResponse.ok) {
+                    const activityData = await activityResponse.json();
+                    if (activityData.success && activityData.data) {
+                        const streamContainer = document.getElementById('activity-stream');
+                        streamContainer.innerHTML = activityData.data.map(item => {
+                            const memberInitial = item.memberName ? item.memberName.charAt(0).toUpperCase() : 'S';
+                            return `
+                                <div class="stream-item">
+                                    <div class="member-initial">${memberInitial}</div>
+                                    <div class="stream-details">
+                                        <div class="stream-header-info">
+                                            <span class="member-name">${item.memberDisplayName || item.memberName || 'System'}</span>
+                                            <span class="stream-time">${formatTimeAgo(item.timestamp)}</span>
+                                        </div>
+                                        <p class="stream-text">${item.updateText || item.summary || 'Update processed'}</p>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('');
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading initial data:', error);
+            }
+        }
+
+        function formatTimeAgo(timestamp) {
+            const seconds = Math.floor((new Date() - new Date(timestamp)) / 1000);
+            
+            if (seconds < 60) return 'just now';
+            if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
+            if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
+            return `${Math.floor(seconds / 86400)}d ago`;
+        }
+
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', function() {
+            loadInitialData();
             initializeWebSocket();
         });
     </script>
