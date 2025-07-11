@@ -593,6 +593,13 @@
                 document.querySelectorAll('.user-btn').forEach(b => b.classList.remove('active'));
                 this.classList.add('active');
                 currentUser = this.dataset.user;
+                
+                // Clear any existing password for security when switching users
+                Object.keys(sessionStorage).forEach(key => {
+                    if (key.endsWith('_password')) {
+                        sessionStorage.removeItem(key);
+                    }
+                });
             });
         });
 
@@ -641,9 +648,23 @@
             resultsDiv.classList.add('show');
 
             try {
+                // Get stored credentials or prompt for password
+                let password = sessionStorage.getItem(`${currentUser}_password`);
+                if (!password) {
+                    password = prompt(`Please enter password for ${currentUser}:`);
+                    if (!password) {
+                        resultsDiv.innerHTML = 'Authentication required.';
+                        return;
+                    }
+                    sessionStorage.setItem(`${currentUser}_password`, password);
+                }
+
                 const response = await fetch('/api/memory/query', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Basic ' + btoa(`${currentUser}:${password}`)
+                    },
                     body: JSON.stringify({
                         query: query,
                         memberId: currentUser
@@ -661,6 +682,10 @@
                     } else {
                         resultsDiv.innerHTML = 'No matching conversations found.';
                     }
+                } else if (response.status === 401) {
+                    // Clear stored password if authentication failed
+                    sessionStorage.removeItem(`${currentUser}_password`);
+                    resultsDiv.innerHTML = 'Invalid password. Please refresh and try again.';
                 } else {
                     resultsDiv.innerHTML = 'Error searching memory. Please try again.';
                 }
@@ -681,9 +706,24 @@
             submitBtn.textContent = 'Submitting...';
 
             try {
+                // Get stored credentials or prompt for password
+                let password = sessionStorage.getItem(`${currentUser}_password`);
+                if (!password) {
+                    password = prompt(`Please enter password for ${currentUser}:`);
+                    if (!password) {
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = 'Submit Update';
+                        return;
+                    }
+                    sessionStorage.setItem(`${currentUser}_password`, password);
+                }
+
                 const response = await fetch('/api/update', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Basic ' + btoa(`${currentUser}:${password}`)
+                    },
                     body: JSON.stringify({
                         memberName: currentUser,
                         updateText: updateContent,
@@ -705,6 +745,10 @@
                     
                     // Add to activity log with details
                     addToActivityLog('Update processed', data);
+                } else if (response.status === 401) {
+                    // Clear stored password if authentication failed
+                    sessionStorage.removeItem(`${currentUser}_password`);
+                    showStatus('Invalid password. Please try again.', true);
                 } else {
                     const errorMsg = data.error?.message || 'Error submitting update';
                     showStatus(errorMsg, true);
