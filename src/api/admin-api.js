@@ -379,7 +379,7 @@ export class AdminAPI {
      */
     requireAdminAuth(req, res, next) {
         // Check if user is authenticated and is an executive
-        if (!req.auth || req.auth.user !== 'tre') {
+        if (!req.auth || (req.auth.user !== 'tre' && req.auth.user !== 'josh')) {
             return res.status(403).json({ error: 'Hold up! You need admin privileges for this. Are you logged in as an admin?' });
         }
         next();
