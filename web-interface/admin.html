@@ -1,0 +1,1208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Team CRM Admin</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
+            background: #ffffff;
+            color: #000000;
+            line-height: 1.5;
+        }
+
+        /* Header */
+        .header {
+            background: #000000;
+            color: #ffffff;
+            padding: 20px 40px;
+            border-bottom: 1px solid #333333;
+        }
+
+        .header-content {
+            max-width: 1600px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 18px;
+            font-weight: 400;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .header-nav {
+            display: flex;
+            gap: 40px;
+        }
+
+        .header-nav a {
+            color: #999999;
+            text-decoration: none;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: color 0.2s;
+        }
+
+        .header-nav a:hover,
+        .header-nav a.active {
+            color: #ffffff;
+        }
+
+        /* Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px;
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 40px;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background: #f8f8f8;
+            border: 1px solid #e0e0e0;
+            padding: 24px;
+        }
+
+        .sidebar h3 {
+            font-size: 13px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 20px;
+        }
+
+        .user-list {
+            list-style: none;
+        }
+
+        .user-item {
+            padding: 12px 0;
+            border-bottom: 1px solid #e0e0e0;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .user-item:hover {
+            padding-left: 8px;
+        }
+
+        .user-item.active {
+            font-weight: 500;
+            padding-left: 8px;
+        }
+
+        .user-name {
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        .user-role {
+            font-size: 12px;
+            color: #666666;
+        }
+
+        .executive-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            background: #000000;
+            color: #ffffff;
+            font-size: 10px;
+            text-transform: uppercase;
+            margin-left: 8px;
+        }
+
+        .sidebar-divider {
+            margin: 20px 0;
+            padding: 0;
+            border: 0;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .settings-nav {
+            list-style: none;
+            margin-top: 20px;
+        }
+
+        .settings-nav-item {
+            padding: 12px 0;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .settings-nav-item:hover {
+            padding-left: 8px;
+        }
+
+        .settings-nav-item.active {
+            font-weight: 500;
+            padding-left: 8px;
+        }
+
+        /* Main Content */
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+        }
+
+        /* User Form */
+        .user-form {
+            background: #ffffff;
+            border: 1px solid #e0e0e0;
+            padding: 32px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-label {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #666666;
+        }
+
+        .form-input {
+            padding: 10px 16px;
+            border: 1px solid #e0e0e0;
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #000000;
+        }
+
+        .form-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 16px;
+            padding-top: 24px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #000000;
+            color: #ffffff;
+        }
+
+        .btn-primary:hover {
+            background: #333333;
+        }
+
+        .btn-secondary {
+            background: #ffffff;
+            color: #000000;
+            border: 1px solid #e0e0e0;
+        }
+
+        .btn-secondary:hover {
+            background: #f8f8f8;
+        }
+
+        .btn-danger {
+            background: #cc0000;
+            color: #ffffff;
+        }
+
+        .btn-danger:hover {
+            background: #990000;
+        }
+
+        /* Add User Section */
+        .add-user-section {
+            background: #f8f8f8;
+            border: 1px solid #e0e0e0;
+            padding: 24px;
+        }
+
+        .section-header {
+            font-size: 14px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 20px;
+        }
+
+        /* Password Display */
+        .password-display {
+            background: #f0f0f0;
+            padding: 12px 16px;
+            font-family: monospace;
+            font-size: 14px;
+            border: 1px solid #e0e0e0;
+            margin-top: 4px;
+        }
+
+        /* Status Message */
+        .status-message {
+            padding: 16px;
+            margin-bottom: 24px;
+            border: 1px solid;
+            display: none;
+        }
+
+        .status-message.success {
+            background: #f0fdf4;
+            border-color: #bbf7d0;
+            color: #166534;
+        }
+
+        .status-message.error {
+            background: #fef2f2;
+            border-color: #fecaca;
+            color: #991b1b;
+        }
+
+        /* Bulk Import */
+        .import-section {
+            background: #ffffff;
+            border: 1px solid #e0e0e0;
+            padding: 32px;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+
+        .file-input {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .file-label {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #f8f8f8;
+            border: 1px solid #e0e0e0;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .file-label:hover {
+            background: #f0f0f0;
+        }
+
+        .csv-preview {
+            margin-top: 20px;
+            padding: 16px;
+            background: #f8f8f8;
+            border: 1px solid #e0e0e0;
+            font-family: monospace;
+            font-size: 12px;
+            white-space: pre;
+            overflow-x: auto;
+        }
+
+        /* Settings Section Styles */
+        .settings-section {
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+        }
+
+        .settings-group {
+            background: #ffffff;
+            border: 1px solid #e0e0e0;
+            padding: 32px;
+        }
+
+        .settings-group-header {
+            font-size: 14px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .form-help {
+            display: block;
+            margin-top: 4px;
+            font-size: 11px;
+            color: #999999;
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .checkbox-group .form-checkbox {
+            margin: 0;
+        }
+
+        .integration-status {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: #f8f8f8;
+            border: 1px solid #e0e0e0;
+        }
+
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #cccccc;
+        }
+
+        .status-indicator.active {
+            background: #00cc00;
+        }
+
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .status-card {
+            background: #f8f8f8;
+            border: 1px solid #e0e0e0;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .status-label {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #666666;
+            margin-bottom: 8px;
+        }
+
+        .status-value {
+            font-size: 24px;
+            font-weight: 500;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px;
+            color: #999999;
+        }
+
+        @media (max-width: 1024px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar {
+                order: 2;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <h1>Team Administration</h1>
+            <nav class="header-nav">
+                <a href="/chat">Team Input</a>
+                <a href="/executive-dashboard">Executive View</a>
+                <a href="/admin" class="active">Admin</a>
+                <a href="/api/docs">API</a>
+            </nav>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="sidebar">
+            <h3>Team Members</h3>
+            <ul class="user-list" id="user-list">
+                <!-- Users will be populated here -->
+            </ul>
+            
+            <hr class="sidebar-divider">
+            
+            <h3>Settings</h3>
+            <ul class="settings-nav">
+                <li class="settings-nav-item" onclick="showSettings()">System Configuration</li>
+                <li class="settings-nav-item" onclick="showBulkImport()">Bulk Import</li>
+            </ul>
+        </div>
+
+        <div class="main-content">
+            <div class="status-message" id="status-message"></div>
+
+            <!-- Edit User Form -->
+            <div class="user-form" id="edit-form" style="display: none;">
+                <h2 class="section-header">Edit User</h2>
+                <form id="user-edit-form">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Username</label>
+                            <input type="text" class="form-input" id="edit-username" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Full Name</label>
+                            <input type="text" class="form-input" id="edit-name" required>
+                        </div>
+                        <div class="form-group full-width">
+                            <label class="form-label">Role</label>
+                            <input type="text" class="form-input" id="edit-role" required>
+                        </div>
+                        <div class="form-group full-width">
+                            <label class="form-label">Focus Areas (comma separated)</label>
+                            <input type="text" class="form-input" id="edit-focus" 
+                                   placeholder="dealer_relationships, strategic_accounts, pilot_success">
+                        </div>
+                        <div class="form-group full-width">
+                            <div class="form-checkbox">
+                                <input type="checkbox" id="edit-executive">
+                                <label for="edit-executive">Grant Executive Access</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                        <button type="button" class="btn btn-secondary" onclick="cancelEdit()">Cancel</button>
+                        <button type="button" class="btn btn-danger" onclick="deleteUser()">Delete User</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Add User Form -->
+            <div class="add-user-section" id="add-user-section">
+                <h2 class="section-header">Add New User</h2>
+                <form id="add-user-form">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Username</label>
+                            <input type="text" class="form-input" id="new-username" required 
+                                   pattern="[a-z0-9_]+" title="Lowercase letters, numbers, and underscores only">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Full Name</label>
+                            <input type="text" class="form-input" id="new-name" required>
+                        </div>
+                        <div class="form-group full-width">
+                            <label class="form-label">Role</label>
+                            <input type="text" class="form-input" id="new-role" required>
+                        </div>
+                        <div class="form-group full-width">
+                            <div class="form-checkbox">
+                                <input type="checkbox" id="new-executive">
+                                <label for="new-executive">Grant Executive Access</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Add User</button>
+                        <button type="reset" class="btn btn-secondary">Clear</button>
+                    </div>
+                </form>
+                <div id="new-password-display" style="display: none; margin-top: 20px;">
+                    <label class="form-label">Generated Password</label>
+                    <div class="password-display" id="generated-password"></div>
+                    <p style="margin-top: 8px; font-size: 12px; color: #666666;">
+                        Save this password and share it securely with the user. You'll need to add it to your environment variables.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Bulk Import -->
+            <div class="import-section" id="import-section" style="display: none;">
+                <h2 class="section-header">Bulk Import Users</h2>
+                <p style="margin-bottom: 20px; color: #666666;">
+                    Upload a CSV file with columns: username, name, role, is_executive
+                </p>
+                <div class="file-input-wrapper">
+                    <input type="file" class="file-input" id="csv-file" accept=".csv">
+                    <label class="file-label" for="csv-file">Choose CSV File</label>
+                </div>
+                <button class="btn btn-primary" onclick="importCSV()" style="margin-left: 16px;">Import Users</button>
+                <div class="csv-preview" id="csv-preview" style="display: none;"></div>
+            </div>
+
+            <!-- System Settings -->
+            <div class="settings-section" id="settings-section" style="display: none;">
+                <h2 class="section-header">System Settings</h2>
+                
+                <!-- AI Configuration -->
+                <div class="settings-group">
+                    <h3 class="settings-group-header">AI Configuration</h3>
+                    <form id="ai-settings-form">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="form-label">Extraction Model</label>
+                                <select class="form-input" id="extraction-model">
+                                    <option value="claude-3-sonnet">Claude 3 Sonnet (Balanced)</option>
+                                    <option value="claude-3-opus">Claude 3 Opus (Powerful)</option>
+                                    <option value="gpt-4-turbo">GPT-4 Turbo</option>
+                                    <option value="gpt-3.5-turbo">GPT-3.5 Turbo (Fast)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Summary Model</label>
+                                <select class="form-input" id="summary-model">
+                                    <option value="claude-3-opus">Claude 3 Opus (Best)</option>
+                                    <option value="claude-3-sonnet">Claude 3 Sonnet</option>
+                                    <option value="gpt-4-turbo">GPT-4 Turbo</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Batch Interval (seconds)</label>
+                                <input type="number" class="form-input" id="batch-interval" min="60" max="3600" step="60">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Priority Threshold</label>
+                                <input type="number" class="form-input" id="priority-threshold" min="0.1" max="1.0" step="0.1">
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">Save AI Settings</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Business Rules -->
+                <div class="settings-group">
+                    <h3 class="settings-group-header">Business Rules</h3>
+                    <form id="business-rules-form">
+                        <div class="form-grid">
+                            <div class="form-group full-width">
+                                <label class="form-label">High Priority Keywords</label>
+                                <input type="text" class="form-input" id="priority-keywords" 
+                                       placeholder="urgent, critical, deadline, dealer, pilot">
+                                <small class="form-help">Comma-separated keywords that trigger high priority</small>
+                            </div>
+                            <div class="form-group full-width">
+                                <label class="form-label">Executive Alert Conditions</label>
+                                <div class="checkbox-group">
+                                    <label class="form-checkbox">
+                                        <input type="checkbox" id="alert-high-priority" checked>
+                                        <span>High Priority Items</span>
+                                    </label>
+                                    <label class="form-checkbox">
+                                        <input type="checkbox" id="alert-dealer-risk" checked>
+                                        <span>Dealer at Risk</span>
+                                    </label>
+                                    <label class="form-checkbox">
+                                        <input type="checkbox" id="alert-pilot-decision" checked>
+                                        <span>Pilot Decisions</span>
+                                    </label>
+                                    <label class="form-checkbox">
+                                        <input type="checkbox" id="alert-competitor" checked>
+                                        <span>Competitor Threats</span>
+                                    </label>
+                                    <label class="form-checkbox">
+                                        <input type="checkbox" id="alert-revenue-impact" checked>
+                                        <span>Revenue Impact > $50k</span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Memory Retention (days)</label>
+                                <input type="number" class="form-input" id="memory-retention" min="7" max="365" step="1">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Summary Schedule</label>
+                                <select class="form-input" id="summary-schedule">
+                                    <option value="realtime">Real-time</option>
+                                    <option value="15min">Every 15 minutes</option>
+                                    <option value="30min">Every 30 minutes</option>
+                                    <option value="1hour">Every hour</option>
+                                    <option value="daily">Daily at 9 AM</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">Save Business Rules</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Integration Settings -->
+                <div class="settings-group">
+                    <h3 class="settings-group-header">Integrations</h3>
+                    <form id="integration-settings-form">
+                        <div class="form-grid">
+                            <div class="form-group full-width">
+                                <label class="form-label">Supermemory Status</label>
+                                <div class="integration-status" id="supermemory-status">
+                                    <span class="status-indicator active"></span>
+                                    <span>Connected</span>
+                                </div>
+                            </div>
+                            <div class="form-group full-width">
+                                <label class="form-label">Database Status</label>
+                                <div class="integration-status" id="database-status">
+                                    <span class="status-indicator active"></span>
+                                    <span>PostgreSQL Connected</span>
+                                </div>
+                            </div>
+                            <div class="form-group full-width">
+                                <label class="form-label">Webhook URL (Optional)</label>
+                                <input type="url" class="form-input" id="webhook-url" 
+                                       placeholder="https://your-system.com/webhook">
+                                <small class="form-help">Send executive alerts to external system</small>
+                            </div>
+                            <div class="form-group full-width">
+                                <label class="form-label">Slack Webhook (Optional)</label>
+                                <input type="url" class="form-input" id="slack-webhook" 
+                                       placeholder="https://hooks.slack.com/services/...">
+                                <small class="form-help">Send alerts to Slack channel</small>
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">Save Integration Settings</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- System Status -->
+                <div class="settings-group">
+                    <h3 class="settings-group-header">System Status</h3>
+                    <div class="status-grid">
+                        <div class="status-card">
+                            <div class="status-label">Total Updates</div>
+                            <div class="status-value" id="total-updates">0</div>
+                        </div>
+                        <div class="status-card">
+                            <div class="status-label">Active Users</div>
+                            <div class="status-value" id="active-users">0</div>
+                        </div>
+                        <div class="status-card">
+                            <div class="status-label">AI Requests Today</div>
+                            <div class="status-value" id="ai-requests">0</div>
+                        </div>
+                        <div class="status-card">
+                            <div class="status-label">Memory Usage</div>
+                            <div class="status-value" id="memory-usage">0 MB</div>
+                        </div>
+                    </div>
+                    <div class="form-actions" style="margin-top: 24px;">
+                        <button class="btn btn-secondary" onclick="refreshSystemStatus()">Refresh Status</button>
+                        <button class="btn btn-secondary" onclick="exportConfig()">Export Configuration</button>
+                        <button class="btn btn-danger" onclick="clearCache()">Clear Cache</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentUsers = {};
+        let currentEditUser = null;
+        let currentView = 'users';
+
+        // Navigation functions
+        function showSettings() {
+            currentView = 'settings';
+            document.getElementById('edit-form').style.display = 'none';
+            document.getElementById('add-user-section').style.display = 'none';
+            document.getElementById('import-section').style.display = 'none';
+            document.getElementById('settings-section').style.display = 'block';
+            
+            // Update nav
+            document.querySelectorAll('.settings-nav-item').forEach(item => {
+                item.classList.toggle('active', item.textContent === 'System Configuration');
+            });
+            document.querySelectorAll('.user-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Load settings
+            loadSettings();
+        }
+
+        function showBulkImport() {
+            currentView = 'import';
+            document.getElementById('edit-form').style.display = 'none';
+            document.getElementById('add-user-section').style.display = 'none';
+            document.getElementById('settings-section').style.display = 'none';
+            document.getElementById('import-section').style.display = 'block';
+            
+            // Update nav
+            document.querySelectorAll('.settings-nav-item').forEach(item => {
+                item.classList.toggle('active', item.textContent === 'Bulk Import');
+            });
+            document.querySelectorAll('.user-item').forEach(item => {
+                item.classList.remove('active');
+            });
+        }
+
+        function showUserManagement() {
+            currentView = 'users';
+            document.getElementById('edit-form').style.display = 'none';
+            document.getElementById('add-user-section').style.display = 'block';
+            document.getElementById('settings-section').style.display = 'none';
+            document.getElementById('import-section').style.display = 'none';
+            
+            // Update nav
+            document.querySelectorAll('.settings-nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+        }
+
+        // Load users on page load
+        async function loadUsers() {
+            try {
+                const response = await fetch('/api/admin/users');
+                if (!response.ok) throw new Error('Failed to load users');
+                
+                const data = await response.json();
+                currentUsers = data.users;
+                renderUserList();
+            } catch (error) {
+                showStatus('Error loading users: ' + error.message, 'error');
+            }
+        }
+
+        function renderUserList() {
+            const userList = document.getElementById('user-list');
+            userList.innerHTML = '';
+            
+            Object.entries(currentUsers).forEach(([username, user]) => {
+                const li = document.createElement('li');
+                li.className = 'user-item';
+                li.onclick = () => selectUser(username);
+                
+                li.innerHTML = `
+                    <div class="user-name">
+                        ${user.name}
+                        ${user.isExecutive ? '<span class="executive-badge">Executive</span>' : ''}
+                    </div>
+                    <div class="user-role">${user.role}</div>
+                `;
+                
+                userList.appendChild(li);
+            });
+        }
+
+        function selectUser(username) {
+            const user = currentUsers[username];
+            if (!user) return;
+            
+            currentEditUser = username;
+            currentView = 'edit';
+            
+            // Update active state
+            document.querySelectorAll('.user-item').forEach((item, index) => {
+                item.classList.toggle('active', Object.keys(currentUsers)[index] === username);
+            });
+            document.querySelectorAll('.settings-nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Show edit form
+            document.getElementById('edit-form').style.display = 'block';
+            document.getElementById('add-user-section').style.display = 'none';
+            document.getElementById('settings-section').style.display = 'none';
+            document.getElementById('import-section').style.display = 'none';
+            
+            document.getElementById('edit-username').value = username;
+            document.getElementById('edit-name').value = user.name;
+            document.getElementById('edit-role').value = user.role;
+            document.getElementById('edit-focus').value = user.focus_areas?.join(', ') || '';
+            document.getElementById('edit-executive').checked = user.isExecutive || false;
+        }
+
+        function cancelEdit() {
+            document.getElementById('edit-form').style.display = 'none';
+            document.getElementById('add-user-section').style.display = 'block';
+            currentEditUser = null;
+            document.querySelectorAll('.user-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            showUserManagement();
+        }
+
+        // Add user form submission
+        document.getElementById('add-user-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const userData = {
+                username: document.getElementById('new-username').value,
+                name: document.getElementById('new-name').value,
+                role: document.getElementById('new-role').value,
+                isExecutive: document.getElementById('new-executive').checked
+            };
+            
+            try {
+                const response = await fetch('/api/admin/users', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(userData)
+                });
+                
+                if (!response.ok) throw new Error('Failed to add user');
+                
+                const result = await response.json();
+                
+                // Show generated password
+                document.getElementById('generated-password').textContent = result.password;
+                document.getElementById('new-password-display').style.display = 'block';
+                
+                showStatus(`User ${userData.name} added successfully!`, 'success');
+                
+                // Reload users
+                await loadUsers();
+                
+                // Clear form
+                e.target.reset();
+                
+            } catch (error) {
+                showStatus('Error adding user: ' + error.message, 'error');
+            }
+        });
+
+        // Edit user form submission
+        document.getElementById('user-edit-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (!currentEditUser) return;
+            
+            const userData = {
+                name: document.getElementById('edit-name').value,
+                role: document.getElementById('edit-role').value,
+                focus_areas: document.getElementById('edit-focus').value.split(',').map(f => f.trim()).filter(f => f),
+                isExecutive: document.getElementById('edit-executive').checked
+            };
+            
+            try {
+                const response = await fetch(`/api/admin/users/${currentEditUser}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(userData)
+                });
+                
+                if (!response.ok) throw new Error('Failed to update user');
+                
+                showStatus('User updated successfully!', 'success');
+                await loadUsers();
+                cancelEdit();
+                
+            } catch (error) {
+                showStatus('Error updating user: ' + error.message, 'error');
+            }
+        });
+
+        // Delete user
+        async function deleteUser() {
+            if (!currentEditUser) return;
+            
+            if (!confirm(`Are you sure you want to delete ${currentUsers[currentEditUser].name}?`)) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/admin/users/${currentEditUser}`, {
+                    method: 'DELETE'
+                });
+                
+                if (!response.ok) throw new Error('Failed to delete user');
+                
+                showStatus('User deleted successfully!', 'success');
+                await loadUsers();
+                cancelEdit();
+                
+            } catch (error) {
+                showStatus('Error deleting user: ' + error.message, 'error');
+            }
+        }
+
+        // CSV Import
+        document.getElementById('csv-file').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const preview = document.getElementById('csv-preview');
+                preview.textContent = e.target.result.split('\n').slice(0, 5).join('\n') + '\n...';
+                preview.style.display = 'block';
+            };
+            reader.readAsText(file);
+        });
+
+        async function importCSV() {
+            const fileInput = document.getElementById('csv-file');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                showStatus('Please select a CSV file', 'error');
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('csv', file);
+            
+            try {
+                const response = await fetch('/api/admin/users/import', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!response.ok) throw new Error('Failed to import users');
+                
+                const result = await response.json();
+                showStatus(`Successfully imported ${result.imported} users!`, 'success');
+                
+                // Clear file input
+                fileInput.value = '';
+                document.getElementById('csv-preview').style.display = 'none';
+                
+                // Reload users
+                await loadUsers();
+                
+            } catch (error) {
+                showStatus('Error importing users: ' + error.message, 'error');
+            }
+        }
+
+        // Settings functions
+        async function loadSettings() {
+            try {
+                const response = await fetch('/api/admin/settings');
+                if (!response.ok) throw new Error('Failed to load settings');
+                
+                const settings = await response.json();
+                
+                // Populate AI settings
+                document.getElementById('extraction-model').value = settings.ai_configuration?.models?.extraction || 'claude-3-sonnet';
+                document.getElementById('summary-model').value = settings.ai_configuration?.models?.summary || 'claude-3-opus';
+                document.getElementById('batch-interval').value = settings.ai_configuration?.processing?.batch_interval || 300;
+                document.getElementById('priority-threshold').value = settings.ai_configuration?.processing?.priority_threshold || 0.7;
+                
+                // Populate business rules
+                document.getElementById('priority-keywords').value = settings.business_rules?.high_priority_keywords?.join(', ') || '';
+                document.getElementById('memory-retention').value = settings.ai_configuration?.processing?.memory_retention_days || 30;
+                
+                // Load system status
+                refreshSystemStatus();
+                
+            } catch (error) {
+                showStatus('Error loading settings: ' + error.message, 'error');
+            }
+        }
+
+        // AI Settings form
+        document.getElementById('ai-settings-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const settings = {
+                models: {
+                    extraction: document.getElementById('extraction-model').value,
+                    summary: document.getElementById('summary-model').value
+                },
+                processing: {
+                    batch_interval: parseInt(document.getElementById('batch-interval').value),
+                    priority_threshold: parseFloat(document.getElementById('priority-threshold').value)
+                }
+            };
+            
+            try {
+                const response = await fetch('/api/admin/settings/ai', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(settings)
+                });
+                
+                if (!response.ok) throw new Error('Failed to save AI settings');
+                
+                showStatus('AI settings saved successfully!', 'success');
+                
+            } catch (error) {
+                showStatus('Error saving AI settings: ' + error.message, 'error');
+            }
+        });
+
+        // Business Rules form
+        document.getElementById('business-rules-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const rules = {
+                high_priority_keywords: document.getElementById('priority-keywords').value.split(',').map(k => k.trim()).filter(k => k),
+                executive_alert_conditions: [],
+                memory_retention_days: parseInt(document.getElementById('memory-retention').value)
+            };
+            
+            // Collect alert conditions
+            if (document.getElementById('alert-high-priority').checked) rules.executive_alert_conditions.push('high_priority');
+            if (document.getElementById('alert-dealer-risk').checked) rules.executive_alert_conditions.push('dealer_at_risk');
+            if (document.getElementById('alert-pilot-decision').checked) rules.executive_alert_conditions.push('pilot_decision');
+            if (document.getElementById('alert-competitor').checked) rules.executive_alert_conditions.push('competitor_threat');
+            if (document.getElementById('alert-revenue-impact').checked) rules.executive_alert_conditions.push('revenue_impact');
+            
+            try {
+                const response = await fetch('/api/admin/settings/business-rules', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(rules)
+                });
+                
+                if (!response.ok) throw new Error('Failed to save business rules');
+                
+                showStatus('Business rules saved successfully!', 'success');
+                
+            } catch (error) {
+                showStatus('Error saving business rules: ' + error.message, 'error');
+            }
+        });
+
+        // Integration Settings form
+        document.getElementById('integration-settings-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const integrations = {
+                webhook_url: document.getElementById('webhook-url').value,
+                slack_webhook: document.getElementById('slack-webhook').value
+            };
+            
+            try {
+                const response = await fetch('/api/admin/settings/integrations', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(integrations)
+                });
+                
+                if (!response.ok) throw new Error('Failed to save integration settings');
+                
+                showStatus('Integration settings saved successfully!', 'success');
+                
+            } catch (error) {
+                showStatus('Error saving integration settings: ' + error.message, 'error');
+            }
+        });
+
+        // System Status functions
+        async function refreshSystemStatus() {
+            try {
+                const response = await fetch('/api/admin/status');
+                if (!response.ok) throw new Error('Failed to load system status');
+                
+                const status = await response.json();
+                
+                document.getElementById('total-updates').textContent = status.totalUpdates || '0';
+                document.getElementById('active-users').textContent = status.activeUsers || '0';
+                document.getElementById('ai-requests').textContent = status.aiRequestsToday || '0';
+                document.getElementById('memory-usage').textContent = status.memoryUsage || '0 MB';
+                
+                // Update integration status
+                const supermemoryStatus = document.getElementById('supermemory-status').querySelector('.status-indicator');
+                supermemoryStatus.classList.toggle('active', status.integrations?.supermemory);
+                
+                const dbStatus = document.getElementById('database-status').querySelector('.status-indicator');
+                dbStatus.classList.toggle('active', status.integrations?.database);
+                
+            } catch (error) {
+                showStatus('Error loading system status: ' + error.message, 'error');
+            }
+        }
+
+        async function exportConfig() {
+            try {
+                const response = await fetch('/api/admin/export');
+                if (!response.ok) throw new Error('Failed to export configuration');
+                
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `team-crm-config-${new Date().toISOString().split('T')[0]}.json`;
+                a.click();
+                
+                showStatus('Configuration exported successfully!', 'success');
+                
+            } catch (error) {
+                showStatus('Error exporting configuration: ' + error.message, 'error');
+            }
+        }
+
+        async function clearCache() {
+            if (!confirm('Are you sure you want to clear the cache? This will reset temporary data but preserve all user data.')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/admin/cache', {
+                    method: 'DELETE'
+                });
+                
+                if (!response.ok) throw new Error('Failed to clear cache');
+                
+                showStatus('Cache cleared successfully!', 'success');
+                refreshSystemStatus();
+                
+            } catch (error) {
+                showStatus('Error clearing cache: ' + error.message, 'error');
+            }
+        }
+
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('status-message');
+            statusDiv.textContent = message;
+            statusDiv.className = `status-message ${type}`;
+            statusDiv.style.display = 'block';
+            
+            setTimeout(() => {
+                statusDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadUsers();
+        });
+    </script>
+</body>
+</html>

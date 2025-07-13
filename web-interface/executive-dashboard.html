@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Executive Awareness</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
+            background: #ffffff;
+            color: #000000;
+            line-height: 1.5;
+        }
+
+        /* Header */
+        .header {
+            background: #000000;
+            color: #ffffff;
+            padding: 20px 40px;
+            border-bottom: 1px solid #333333;
+        }
+
+        .header-content {
+            max-width: 1600px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 18px;
+            font-weight: 400;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .header-nav {
+            display: flex;
+            gap: 40px;
+        }
+
+        .header-nav a {
+            color: #999999;
+            text-decoration: none;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: color 0.2s;
+        }
+
+        .header-nav a:hover,
+        .header-nav a.active {
+            color: #ffffff;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 40px;
+        }
+
+        /* Attention Section */
+        .attention-section {
+            margin-bottom: 40px;
+        }
+
+        .attention-items {
+            list-style: none;
+            padding: 0;
+        }
+
+        .attention-item {
+            padding: 20px 0;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+        }
+
+        .attention-item:last-child {
+            border-bottom: none;
+        }
+
+        .attention-bullet {
+            width: 8px;
+            height: 8px;
+            background: #cc0000;
+            margin-top: 6px;
+            flex-shrink: 0;
+        }
+
+        .attention-content {
+            flex: 1;
+        }
+
+        .attention-text {
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 8px;
+        }
+
+        .attention-insights {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .insight-tag {
+            background: #f0f0f0;
+            padding: 2px 8px;
+            font-size: 11px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .priority-critical .attention-bullet {
+            background: #cc0000;
+        }
+
+        .priority-high .attention-bullet {
+            background: #ff6600;
+        }
+
+        .priority-medium .attention-bullet {
+            background: #ffaa00;
+        }
+
+        .attention-meta {
+            font-size: 12px;
+            color: #666666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Activity Stream */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 40px;
+        }
+
+        .activity-stream {
+            background: #ffffff;
+            border: 1px solid #e0e0e0;
+        }
+
+        .stream-content {
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .stream-item {
+            padding: 20px 24px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            gap: 16px;
+        }
+
+        .stream-item:last-child {
+            border-bottom: none;
+        }
+
+        .member-initial {
+            width: 32px;
+            height: 32px;
+            background: #000000;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 500;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        .stream-details {
+            flex: 1;
+        }
+
+        .stream-header-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .member-name {
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .stream-time {
+            font-size: 11px;
+            color: #999999;
+            text-transform: uppercase;
+        }
+
+        .stream-text {
+            font-size: 14px;
+            line-height: 1.6;
+            color: #333333;
+            margin-bottom: 8px;
+        }
+
+        .stream-insights {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .stream-insight {
+            background: #f8f8f8;
+            padding: 2px 6px;
+            font-size: 10px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        /* Message Input */
+        .message-section {
+            background: #f8f8f8;
+            border: 1px solid #e0e0e0;
+            padding: 24px;
+        }
+
+        .message-form {
+            display: flex;
+            gap: 16px;
+        }
+
+        .message-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 1px solid #e0e0e0;
+            background: #ffffff;
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        .message-input:focus {
+            outline: none;
+            border-color: #000000;
+        }
+
+        .send-btn {
+            padding: 12px 24px;
+            background: #000000;
+            color: #ffffff;
+            border: none;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .send-btn:hover {
+            background: #333333;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f0f0f0;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #cccccc;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #999999;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            
+            .attention-item {
+                flex-direction: column;
+                gap: 8px;
+            }
+            
+            .attention-bullet {
+                width: 100%;
+                height: 2px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <h1>Executive Awareness</h1>
+            <nav class="header-nav">
+                <a href="/chat">Team Input</a>
+                <a href="/executive-dashboard" class="active">Executive View</a>
+                <a href="/api/docs">API</a>
+            </nav>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Requires Your Attention -->
+        <section class="attention-section">
+            <ul class="attention-items" id="attention-list">
+                <!-- Attention items will be loaded here -->
+            </ul>
+        </section>
+
+        <!-- Activity Stream -->
+        <div class="main-grid">
+            <section class="activity-stream">
+                <div class="stream-content" id="activity-stream">
+                    <!-- Activity items will be loaded here -->
+                </div>
+            </section>
+
+            <!-- Direct Message -->
+            <section class="message-section">
+                <form class="message-form" id="message-form">
+                    <input type="text" 
+                           class="message-input" 
+                           id="message-input"
+                           placeholder="Message team or specific member (e.g. @joe, @charlie)">
+                    <button type="submit" class="send-btn">Send</button>
+                </form>
+            </section>
+        </div>
+    </div>
+
+    <script>
+        // WebSocket connection
+        let ws = null;
+        let reconnectAttempts = 0;
+        const maxReconnectAttempts = 5;
+
+        function initializeWebSocket() {
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsUrl = `${protocol}//${window.location.host}/realtime`;
+            
+            try {
+                ws = new WebSocket(wsUrl);
+                
+                ws.onopen = function() {
+                    console.log('Connected to real-time feed');
+                    reconnectAttempts = 0;
+                    
+                    ws.send(JSON.stringify({
+                        type: 'subscribe',
+                        channel: 'executive'
+                    }));
+                    
+                    ws.send(JSON.stringify({
+                        type: 'subscribe',
+                        channel: 'team-updates'
+                    }));
+                };
+                
+                ws.onmessage = function(event) {
+                    try {
+                        const message = JSON.parse(event.data);
+                        handleRealtimeUpdate(message);
+                    } catch (error) {
+                        console.error('Error parsing message:', error);
+                    }
+                };
+                
+                ws.onclose = function() {
+                    console.log('WebSocket connection closed');
+                    if (reconnectAttempts < maxReconnectAttempts) {
+                        reconnectAttempts++;
+                        setTimeout(initializeWebSocket, 3000 * reconnectAttempts);
+                    }
+                };
+                
+            } catch (error) {
+                console.error('Failed to initialize WebSocket:', error);
+            }
+        }
+
+        function handleRealtimeUpdate(message) {
+            if (message.type === 'channel-broadcast') {
+                if (message.channel === 'executive' && message.data.type === 'escalationCreated') {
+                    addAttentionItem(message.data.data);
+                } else if (message.channel === 'team-updates' && message.data.type === 'updateProcessed') {
+                    addActivityItem(message.data.data);
+                }
+            }
+        }
+
+        function addAttentionItem(data) {
+            const attentionList = document.getElementById('attention-list');
+            const li = document.createElement('li');
+            const priorityClass = `priority-${data.urgency || 'medium'}`;
+            li.className = `attention-item ${priorityClass}`;
+            li.style.opacity = '0';
+            
+            const insights = data.executiveInsights || [];
+            li.innerHTML = `
+                <div class="attention-bullet"></div>
+                <div class="attention-content">
+                    <div class="attention-text">${data.description || data.summary}</div>
+                    ${insights.length > 0 ? `
+                        <div class="attention-insights">
+                            ${insights.map(insight => `<span class="insight-tag">${insight}</span>`).join('')}
+                        </div>
+                    ` : ''}
+                    <div class="attention-meta">
+                        ${data.memberDisplayName || data.member || 'System'} • Just now • ${data.context?.clientName || data.client || 'Alert'}
+                    </div>
+                </div>
+            `;
+            
+            attentionList.insertBefore(li, attentionList.firstChild);
+            
+            setTimeout(() => {
+                li.style.transition = 'opacity 0.5s';
+                li.style.opacity = '1';
+            }, 100);
+        }
+
+        function addActivityItem(data) {
+            const streamContainer = document.getElementById('activity-stream');
+            const item = document.createElement('div');
+            item.className = 'stream-item';
+            item.style.opacity = '0';
+            
+            const memberInitial = data.memberName ? data.memberName.charAt(0).toUpperCase() : 'S';
+            const insights = data.executiveInsights || data.insights || [];
+            
+            item.innerHTML = `
+                <div class="member-initial">${memberInitial}</div>
+                <div class="stream-details">
+                    <div class="stream-header-info">
+                        <span class="member-name">${data.memberDisplayName || data.memberName || 'System'}</span>
+                        <span class="stream-time">Just now</span>
+                    </div>
+                    <p class="stream-text">${data.updateText || data.summary || 'Update processed'}</p>
+                    ${insights.length > 0 ? `
+                        <div class="stream-insights">
+                            ${insights.map(insight => `<span class="stream-insight">${insight}</span>`).join('')}
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+            
+            streamContainer.insertBefore(item, streamContainer.firstChild);
+            
+            setTimeout(() => {
+                item.style.transition = 'opacity 0.5s';
+                item.style.opacity = '1';
+            }, 100);
+            
+            // Keep only last 20 items
+            while (streamContainer.children.length > 20) {
+                streamContainer.removeChild(streamContainer.lastChild);
+            }
+        }
+
+        // Message form
+        document.getElementById('message-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const input = document.getElementById('message-input');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            // Parse @mentions
+            let recipient = '';
+            let cleanMessage = message;
+            
+            if (message.startsWith('@joe ')) {
+                recipient = 'joe';
+                cleanMessage = message.substring(5);
+            } else if (message.startsWith('@charlie ')) {
+                recipient = 'charlie';
+                cleanMessage = message.substring(9);
+            }
+            
+            try {
+                const response = await fetch('/api/comments', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        message: cleanMessage,
+                        assignee: recipient,
+                        priority: 'normal'
+                    })
+                });
+                
+                if (response.ok) {
+                    input.value = '';
+                }
+            } catch (error) {
+                console.error('Error sending message:', error);
+            }
+        });
+
+        // Load initial data
+        async function loadInitialData() {
+            try {
+                // Load attention items
+                const attentionResponse = await fetch('/api/executive/attention');
+                if (attentionResponse.ok) {
+                    const attentionData = await attentionResponse.json();
+                    if (attentionData.success && attentionData.data) {
+                        const attentionList = document.getElementById('attention-list');
+                        attentionList.innerHTML = attentionData.data.map(item => {
+                            const priorityClass = `priority-${item.urgency || 'medium'}`;
+                            const insights = item.executiveInsights || [];
+                            return `
+                                <li class="attention-item ${priorityClass}">
+                                    <div class="attention-bullet"></div>
+                                    <div class="attention-content">
+                                        <div class="attention-text">${item.description || item.summary}</div>
+                                        ${insights.length > 0 ? `
+                                            <div class="attention-insights">
+                                                ${insights.map(insight => `<span class="insight-tag">${insight}</span>`).join('')}
+                                            </div>
+                                        ` : ''}
+                                        <div class="attention-meta">
+                                            ${item.memberDisplayName || item.member || 'System'} • ${formatTimeAgo(item.timestamp)} • ${item.context?.clientName || 'Alert'}
+                                        </div>
+                                    </div>
+                                </li>
+                            `;
+                        }).join('');
+                    }
+                }
+
+                // Load recent activity
+                const activityResponse = await fetch('/api/executive/activity');
+                if (activityResponse.ok) {
+                    const activityData = await activityResponse.json();
+                    if (activityData.success && activityData.data) {
+                        const streamContainer = document.getElementById('activity-stream');
+                        streamContainer.innerHTML = activityData.data.map(item => {
+                            const memberInitial = item.memberName ? item.memberName.charAt(0).toUpperCase() : 'S';
+                            const insights = item.insights || [];
+                            return `
+                                <div class="stream-item">
+                                    <div class="member-initial">${memberInitial}</div>
+                                    <div class="stream-details">
+                                        <div class="stream-header-info">
+                                            <span class="member-name">${item.memberDisplayName || item.memberName || 'System'}</span>
+                                            <span class="stream-time">${formatTimeAgo(item.timestamp)}</span>
+                                        </div>
+                                        <p class="stream-text">${item.updateText || item.summary || 'Update processed'}</p>
+                                        ${insights.length > 0 ? `
+                                            <div class="stream-insights">
+                                                ${insights.map(insight => `<span class="stream-insight">${insight}</span>`).join('')}
+                                            </div>
+                                        ` : ''}
+                                    </div>
+                                </div>
+                            `;
+                        }).join('');
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading initial data:', error);
+            }
+        }
+
+        function formatTimeAgo(timestamp) {
+            const seconds = Math.floor((new Date() - new Date(timestamp)) / 1000);
+            
+            if (seconds < 60) return 'just now';
+            if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
+            if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
+            return `${Math.floor(seconds / 86400)}d ago`;
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadInitialData();
+            initializeWebSocket();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice Input - Team CRM</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
+            background: #ffffff;
+            color: #000000;
+            line-height: 1.5;
+        }
+
+        /* Header */
+        .header {
+            background: #000000;
+            color: #ffffff;
+            padding: 20px 40px;
+            border-bottom: 1px solid #333333;
+        }
+
+        .header-content {
+            max-width: 1600px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 18px;
+            font-weight: 400;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .header-nav {
+            display: flex;
+            gap: 40px;
+        }
+
+        .header-nav a {
+            color: #999999;
+            text-decoration: none;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: color 0.2s;
+        }
+
+        .header-nav a:hover,
+        .header-nav a.active {
+            color: #ffffff;
+        }
+
+        /* Main Content */
+        .main-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 60px 40px;
+        }
+
+        /* Voice Section */
+        .voice-section {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 40px;
+            margin-bottom: 40px;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .section-title {
+            font-size: 32px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #000000;
+        }
+
+        .section-subtitle {
+            font-size: 18px;
+            color: #666666;
+        }
+
+        /* Voice Controls */
+        .voice-controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .voice-button {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: none;
+            background: #000000;
+            color: #ffffff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .voice-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+        }
+
+        .voice-button.listening {
+            background: #ff3333;
+            animation: pulse 2s infinite;
+        }
+
+        .voice-button.processing {
+            background: #3366ff;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(255, 51, 51, 0.4);
+            }
+            70% {
+                box-shadow: 0 0 0 20px rgba(255, 51, 51, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(255, 51, 51, 0);
+            }
+        }
+
+        .voice-icon {
+            width: 48px;
+            height: 48px;
+            fill: currentColor;
+        }
+
+        .voice-status {
+            font-size: 16px;
+            color: #666666;
+            text-align: center;
+        }
+
+        /* Language Selector */
+        .language-selector {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .language-selector label {
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .language-selector select {
+            padding: 8px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            background: #ffffff;
+            cursor: pointer;
+        }
+
+        /* Transcript Area */
+        .transcript-area {
+            background: #ffffff;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 24px;
+            min-height: 200px;
+            margin-bottom: 24px;
+        }
+
+        .transcript-label {
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+            color: #666666;
+        }
+
+        .transcript-text {
+            font-size: 18px;
+            line-height: 1.6;
+            color: #000000;
+            min-height: 150px;
+            white-space: pre-wrap;
+        }
+
+        .interim-text {
+            color: #999999;
+            font-style: italic;
+        }
+
+        /* Team Member Selection */
+        .team-selection {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-bottom: 24px;
+        }
+
+        .team-member-btn {
+            padding: 12px 24px;
+            background: #ffffff;
+            color: #666666;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .team-member-btn:hover {
+            border-color: #000000;
+        }
+
+        .team-member-btn.active {
+            background: #000000;
+            color: #ffffff;
+            border-color: #000000;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background: #000000;
+            color: #ffffff;
+        }
+
+        .btn-primary:hover {
+            background: #333333;
+        }
+
+        .btn-secondary {
+            background: #ffffff;
+            color: #000000;
+            border: 2px solid #e0e0e0;
+        }
+
+        .btn-secondary:hover {
+            border-color: #000000;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Voice Commands Help */
+        .help-section {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 32px;
+            margin-top: 40px;
+        }
+
+        .help-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        .commands-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 24px;
+        }
+
+        .command-group {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        .command-group-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #000000;
+        }
+
+        .command-list {
+            list-style: none;
+        }
+
+        .command-list li {
+            padding: 4px 0;
+            font-size: 14px;
+            color: #666666;
+        }
+
+        .command-text {
+            font-weight: 600;
+            color: #000000;
+        }
+
+        /* Browser Support Notice */
+        .browser-notice {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 24px;
+            display: none;
+        }
+
+        .browser-notice.show {
+            display: block;
+        }
+
+        .browser-notice-text {
+            font-size: 14px;
+            color: #856404;
+        }
+
+        /* Metrics Display */
+        .metrics {
+            display: flex;
+            gap: 24px;
+            justify-content: center;
+            margin-top: 24px;
+            padding-top: 24px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .metric {
+            text-align: center;
+        }
+
+        .metric-value {
+            font-size: 24px;
+            font-weight: 600;
+            color: #000000;
+        }
+
+        .metric-label {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #666666;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 40px 20px;
+            }
+
+            .voice-section {
+                padding: 24px;
+            }
+
+            .section-title {
+                font-size: 24px;
+            }
+
+            .voice-button {
+                width: 100px;
+                height: 100px;
+            }
+
+            .commands-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .team-selection {
+                flex-wrap: wrap;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="header-content">
+            <h1>Team CRM - Voice Input</h1>
+            <nav class="header-nav">
+                <a href="/chat">Text Input</a>
+                <a href="/enhanced-chat">Enhanced Chat</a>
+                <a href="/voice-input" class="active">Voice Input</a>
+                <a href="/executive-dashboard">Dashboard</a>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Browser Notice -->
+        <div id="browserNotice" class="browser-notice">
+            <p class="browser-notice-text">
+                ⚠️ Voice input works best in Chrome, Edge, or Safari. Some features may not be available in your current browser.
+            </p>
+        </div>
+
+        <!-- Voice Section -->
+        <div class="voice-section">
+            <div class="section-header">
+                <h2 class="section-title">Voice Input</h2>
+                <p class="section-subtitle">Speak naturally to create team updates</p>
+            </div>
+
+            <!-- Language Selector -->
+            <div class="voice-controls">
+                <div class="language-selector">
+                    <label for="languageSelect">Language:</label>
+                    <select id="languageSelect">
+                        <option value="en-US">English (US)</option>
+                        <option value="en-GB">English (UK)</option>
+                        <option value="es-ES">Spanish</option>
+                        <option value="fr-FR">French</option>
+                        <option value="de-DE">German</option>
+                        <option value="ja-JP">Japanese</option>
+                        <option value="zh-CN">Chinese (Simplified)</option>
+                    </select>
+                </div>
+
+                <!-- Voice Button -->
+                <button id="voiceButton" class="voice-button" aria-label="Start voice input">
+                    <svg class="voice-icon" viewBox="0 0 24 24">
+                        <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+                        <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+                    </svg>
+                </button>
+
+                <p id="voiceStatus" class="voice-status">Click the microphone to start</p>
+            </div>
+
+            <!-- Team Member Selection -->
+            <div class="team-selection">
+                <button class="team-member-btn active" data-member="joe">Joe</button>
+                <button class="team-member-btn" data-member="charlie">Charlie</button>
+                <button class="team-member-btn" data-member="tre">Tre</button>
+            </div>
+
+            <!-- Transcript Area -->
+            <div class="transcript-area">
+                <div class="transcript-label">Transcript</div>
+                <div id="transcriptText" class="transcript-text"></div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <button id="clearBtn" class="btn btn-secondary">Clear</button>
+                <button id="submitBtn" class="btn btn-primary" disabled>Submit Update</button>
+            </div>
+
+            <!-- Metrics -->
+            <div class="metrics">
+                <div class="metric">
+                    <div id="wordCount" class="metric-value">0</div>
+                    <div class="metric-label">Words</div>
+                </div>
+                <div class="metric">
+                    <div id="confidence" class="metric-value">--</div>
+                    <div class="metric-label">Confidence</div>
+                </div>
+                <div class="metric">
+                    <div id="duration" class="metric-value">0:00</div>
+                    <div class="metric-label">Duration</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Voice Commands Help -->
+        <div class="help-section">
+            <h3 class="help-title">Voice Commands</h3>
+            <div class="commands-grid">
+                <div class="command-group">
+                    <h4 class="command-group-title">Text Commands</h4>
+                    <ul class="command-list">
+                        <li>Say <span class="command-text">"period"</span> to add .</li>
+                        <li>Say <span class="command-text">"comma"</span> to add ,</li>
+                        <li>Say <span class="command-text">"question mark"</span> to add ?</li>
+                        <li>Say <span class="command-text">"new line"</span> for line break</li>
+                        <li>Say <span class="command-text">"new paragraph"</span> for paragraph</li>
+                    </ul>
+                </div>
+                <div class="command-group">
+                    <h4 class="command-group-title">Action Commands</h4>
+                    <ul class="command-list">
+                        <li>Say <span class="command-text">"clear all"</span> to clear text</li>
+                        <li>Say <span class="command-text">"undo"</span> to remove last</li>
+                        <li>Say <span class="command-text">"submit"</span> or <span class="command-text">"send"</span></li>
+                        <li>Say <span class="command-text">"stop listening"</span> to stop</li>
+                    </ul>
+                </div>
+                <div class="command-group">
+                    <h4 class="command-group-title">Team Commands</h4>
+                    <ul class="command-list">
+                        <li>Say <span class="command-text">"select Joe"</span></li>
+                        <li>Say <span class="command-text">"switch to Charlie"</span></li>
+                        <li>Say <span class="command-text">"select Tre"</span></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script type="module">
+        import { VoiceProcessor } from '/src/core/voice/voice-processor.js';
+        import { checkSpeechRecognitionSupport } from '/src/core/voice/speech-to-text.js';
+
+        // Check browser support
+        const support = checkSpeechRecognitionSupport();
+        if (!support.supported) {
+            document.getElementById('browserNotice').classList.add('show');
+            document.getElementById('voiceButton').disabled = true;
+        }
+
+        // State
+        let currentMember = 'joe';
+        let voiceProcessor = null;
+        let sessionStartTime = null;
+        let durationInterval = null;
+
+        // Initialize voice processor
+        function initializeVoiceProcessor() {
+            voiceProcessor = new VoiceProcessor({
+                autoSubmit: true,
+                autoSubmitDelay: 3000,
+                punctuationMode: true,
+                onTranscript: handleTranscript,
+                onCommand: handleCommand,
+                onSubmit: handleSubmit,
+                onStateChange: handleStateChange,
+                onError: handleError
+            });
+        }
+
+        // Handle transcript updates
+        function handleTranscript(data) {
+            const transcriptEl = document.getElementById('transcriptText');
+            
+            if (data.isInterim) {
+                // Show interim results in gray
+                const finalText = data.transcript.substring(0, data.transcript.lastIndexOf(' ') + 1);
+                const interimText = data.transcript.substring(data.transcript.lastIndexOf(' ') + 1);
+                
+                transcriptEl.innerHTML = finalText + 
+                    '<span class="interim-text">' + interimText + '</span>';
+            } else {
+                transcriptEl.textContent = data.transcript;
+            }
+
+            // Update word count
+            const words = data.transcript.trim().split(/\s+/).filter(w => w.length > 0);
+            document.getElementById('wordCount').textContent = words.length;
+
+            // Enable/disable submit button
+            document.getElementById('submitBtn').disabled = words.length === 0;
+        }
+
+        // Handle voice commands
+        function handleCommand(data) {
+            console.log('Voice command:', data);
+            
+            if (data.command === 'select-member' && data.member) {
+                selectTeamMember(data.member);
+            }
+        }
+
+        // Handle submit
+        async function handleSubmit(data) {
+            try {
+                const response = await fetch('/api/update', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        memberName: currentMember,
+                        updateText: data.transcript,
+                        metadata: {
+                            source: 'voice',
+                            wordCount: data.wordCount,
+                            confidence: data.confidence,
+                            duration: data.duration,
+                            language: document.getElementById('languageSelect').value
+                        }
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Show success feedback
+                    showNotification('Update submitted successfully!', 'success');
+                    
+                    // Clear transcript
+                    document.getElementById('transcriptText').textContent = '';
+                    document.getElementById('wordCount').textContent = '0';
+                    document.getElementById('submitBtn').disabled = true;
+                } else {
+                    showNotification('Failed to submit update', 'error');
+                }
+            } catch (error) {
+                console.error('Submit error:', error);
+                showNotification('Error submitting update', 'error');
+            }
+        }
+
+        // Handle state changes
+        function handleStateChange(state) {
+            const button = document.getElementById('voiceButton');
+            const status = document.getElementById('voiceStatus');
+            
+            if (state.isListening) {
+                button.classList.add('listening');
+                status.textContent = 'Listening... Speak now';
+                startDurationTimer();
+            } else {
+                button.classList.remove('listening');
+                status.textContent = 'Click the microphone to start';
+                stopDurationTimer();
+            }
+            
+            if (state.isProcessing) {
+                button.classList.add('processing');
+            } else {
+                button.classList.remove('processing');
+            }
+            
+            // Update confidence if available
+            if (state.confidenceAverage > 0) {
+                const confidencePercent = Math.round(state.confidenceAverage * 100);
+                document.getElementById('confidence').textContent = confidencePercent + '%';
+            }
+        }
+
+        // Handle errors
+        function handleError(error) {
+            console.error('Voice error:', error);
+            showNotification(error.message, 'error');
+            
+            const button = document.getElementById('voiceButton');
+            button.classList.remove('listening', 'processing');
+        }
+
+        // Team member selection
+        function selectTeamMember(memberId) {
+            currentMember = memberId;
+            
+            document.querySelectorAll('.team-member-btn').forEach(btn => {
+                if (btn.dataset.member === memberId) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+        }
+
+        // Duration timer
+        function startDurationTimer() {
+            sessionStartTime = Date.now();
+            durationInterval = setInterval(updateDuration, 100);
+        }
+
+        function stopDurationTimer() {
+            if (durationInterval) {
+                clearInterval(durationInterval);
+                durationInterval = null;
+            }
+        }
+
+        function updateDuration() {
+            if (sessionStartTime) {
+                const elapsed = Date.now() - sessionStartTime;
+                const seconds = Math.floor(elapsed / 1000);
+                const minutes = Math.floor(seconds / 60);
+                const remainingSeconds = seconds % 60;
+                
+                document.getElementById('duration').textContent = 
+                    `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+            }
+        }
+
+        // Show notification
+        function showNotification(message, type) {
+            // Simple alert for now - could be replaced with better UI
+            if (type === 'error') {
+                console.error(message);
+            } else {
+                console.log(message);
+            }
+        }
+
+        // Event Listeners
+        document.getElementById('voiceButton').addEventListener('click', () => {
+            if (voiceProcessor.getState().isListening) {
+                voiceProcessor.stop();
+            } else {
+                voiceProcessor.start().catch(error => {
+                    handleError({
+                        message: 'Failed to start voice input. Please ensure microphone access is allowed.'
+                    });
+                });
+            }
+        });
+
+        document.getElementById('clearBtn').addEventListener('click', () => {
+            if (voiceProcessor) {
+                voiceProcessor.clearTranscript();
+            }
+            document.getElementById('transcriptText').textContent = '';
+            document.getElementById('wordCount').textContent = '0';
+            document.getElementById('submitBtn').disabled = true;
+        });
+
+        document.getElementById('submitBtn').addEventListener('click', () => {
+            const transcript = document.getElementById('transcriptText').textContent;
+            if (transcript.trim()) {
+                handleSubmit({
+                    transcript: transcript,
+                    wordCount: transcript.trim().split(/\s+/).length,
+                    confidence: parseFloat(document.getElementById('confidence').textContent) / 100 || 0,
+                    duration: Date.now() - (sessionStartTime || Date.now())
+                });
+            }
+        });
+
+        document.getElementById('languageSelect').addEventListener('change', (e) => {
+            if (voiceProcessor) {
+                voiceProcessor.setLanguage(e.target.value);
+            }
+        });
+
+        document.querySelectorAll('.team-member-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                selectTeamMember(btn.dataset.member);
+            });
+        });
+
+        // Global function for voice commands
+        window.selectTeamMember = selectTeamMember;
+
+        // Initialize
+        initializeVoiceProcessor();
+    </script>
+</body>
+</html>

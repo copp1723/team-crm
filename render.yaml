@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: team-crm
+    runtime: node
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: SUPERMEMORY_API_KEY
+        sync: false
+      - key: DATABASE_URL
+        sync: false
+      - key: JOE_PASSWORD
+        sync: false
+      - key: CHARLIE_PASSWORD
+        sync: false
+      - key: TRE_PASSWORD
+        sync: false
