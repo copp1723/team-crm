@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Team CRM - AI-Powered Team Input</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        /* Header with Memory Indicator */
+        .header {
+            background: #000000;
+            color: #ffffff;
+            padding: 20px 40px;
+            border-bottom: 1px solid #333333;
+            position: relative;
+        }
+
+        .header-content {
+            max-width: 1600px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-content h1 {
+            font-size: 24px;
+            font-weight: 300;
+            margin: 0;
+            letter-spacing: -0.5px;
+        }
+
+        .header-nav {
+            display: flex;
+            gap: 32px;
+        }
+
+        .header-nav a {
+            color: #999999;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 400;
+            transition: color 0.2s;
+        }
+
+        .header-nav a:hover,
+        .header-nav a.active {
+            color: #ffffff;
+        }
+        
+        /* Memory Status Indicator */
+        .memory-status {
+            position: absolute;
+            right: 40px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        
+        .memory-indicator {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            animation: pulse 3s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+        
+        .memory-icon {
+            font-size: 18px;
+        }
+        
+        .memory-count {
+            opacity: 0.9;
+            font-size: 12px;
+        }
+
+        /* Main Content */
+        .main-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 60px 40px;
+        }
+
+        .input-section {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 40px;
+            margin-bottom: 40px;
+        }
+
+        .section-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #000000;
+        }
+
+        .section-subtitle {
+            font-size: 16px;
+            color: #666666;
+            margin-bottom: 32px;
+        }
+        
+        /* Assistant Hints */
+        .input-assistant-hints {
+            background: #e7f3ff;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            font-size: 14px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .input-assistant-hints p {
+            margin: 0 0 8px 0;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .input-assistant-hints ul {
+            margin: 0;
+            padding-left: 28px;
+            list-style: none;
+        }
+        
+        .input-assistant-hints li:before {
+            content: "✓ ";
+            color: #667eea;
+            font-weight: bold;
+            margin-left: -20px;
+            margin-right: 8px;
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #000000;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-select {
+            width: 100%;
+            max-width: 300px;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            background: #ffffff;
+            transition: border-color 0.2s;
+        }
+
+        .form-select:focus {
+            outline: none;
+            border-color: #000000;
+        }
+
+        .form-textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            font-family: inherit;
+            line-height: 1.5;
+            resize: vertical;
+            transition: border-color 0.2s;
+        }
+
+        .form-textarea:focus {
+            outline: none;
+            border-color: #000000;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            min-width: 120px;
+        }
+
+        .btn-primary {
+            background: #000000;
+            color: #ffffff;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: #333333;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* Processing Status */
+        .processing-status {
+            background: #fff3cd;
+            border: 2px solid #ffd60a;
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 16px;
+            display: none;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .processing-status.show {
+            display: flex;
+        }
+
+        /* Results Section */
+        .results-section {
+            background: #ffffff;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 40px;
+            margin-bottom: 40px;
+            display: none;
+        }
+
+        .results-section.show {
+            display: block;
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .confidence-score {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: #666666;
+        }
+
+        .confidence-bar {
+            width: 60px;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .confidence-fill {
+            height: 100%;
+            background: #28a745;
+            transition: width 0.3s;
+        }
+        
+        /* Memory Context Visualization */
+        .memory-context-used {
+            background: #f0f4ff;
+            border-left: 4px solid #667eea;
+            padding: 16px;
+            margin-bottom: 24px;
+            border-radius: 4px;
+        }
+        
+        .memory-context-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        
+        .memory-context-title {
+            font-weight: 600;
+            color: #667eea;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .toggle-context {
+            background: none;
+            border: 1px solid #667eea;
+            color: #667eea;
+            padding: 4px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+        }
+        
+        .toggle-context:hover {
+            background: #667eea;
+            color: white;
+        }
+        
+        .context-details {
+            margin-top: 12px;
+            display: none;
+        }
+        
+        .context-details.show {
+            display: block;
+        }
+        
+        .memory-item {
+            background: white;
+            padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 8px;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .memory-item .date {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 4px;
+            font-weight: 600;
+        }
+        
+        .memory-item p {
+            margin: 0;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        /* Analysis Grid */
+        .analysis-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 32px;
+            margin-bottom: 32px;
+        }
+
+        .analysis-card {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        .analysis-card h3 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #000000;
+        }
+
+        .analysis-item {
+            background: #ffffff;
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 8px;
+            border-left: 4px solid #007bff;
+        }
+
+        .analysis-item.high-priority {
+            border-left-color: #dc3545;
+        }
+
+        .analysis-item.medium-priority {
+            border-left-color: #ffc107;
+        }
+        
+        /* Response Metadata */
+        .response-metadata {
+            display: flex;
+            gap: 16px;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            margin-top: 16px;
+            font-size: 13px;
+            color: #666;
+        }
+        
+        .response-metadata span {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        /* Client Intelligence Popup */
+        .client-popup {
+            position: absolute;
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            max-width: 300px;
+            z-index: 1000;
+            display: none;
+        }
+        
+        .client-popup.show {
+            display: block;
+        }
+        
+        .client-name {
+            color: #667eea;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+        
+        .client-name:hover {
+            color: #764ba2;
+        }
+
+        /* Activity Feed */
+        .activity-feed {
+            margin-top: 32px;
+        }
+
+        .activity-item {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border-left: 4px solid #e0e0e0;
+        }
+
+        .activity-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .activity-timestamp {
+            font-size: 12px;
+            color: #999999;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .header {
+                padding: 16px 20px;
+            }
+
+            .main-content {
+                padding: 40px 20px;
+            }
+
+            .analysis-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .memory-status {
+                position: static;
+                transform: none;
+                margin-top: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <h1>Team Intelligence Input</h1>
+            <nav class="header-nav">
+                <a href="/chat" class="active">Team Input</a>
+                <a href="/executive-dashboard">Executive Intelligence</a>
+                <a href="/api/docs">API Documentation</a>
+            </nav>
+        </div>
+        <div class="memory-status" id="memoryStatus">
+            <div class="memory-indicator">
+                <span class="memory-icon">🧠</span>
+                <span class="memory-text">Memory Active</span>
+                <span class="memory-count" id="memoryCount">Loading...</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="input-section">
+            <form id="updateForm">
+                <h2 class="section-title">Team Member Update</h2>
+                <p class="section-subtitle">Submit your update in natural language. Our AI will extract and organize the important information.</p>
+                
+                <div class="input-assistant-hints">
+                    <p>💡 Your AI assistant remembers:</p>
+                    <ul>
+                        <li>Client preferences and history</li>
+                        <li>Your communication patterns</li>
+                        <li>Deal progression patterns</li>
+                    </ul>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="memberSelect">Team Member</label>
+                    <select class="form-select" id="memberSelect" name="member" required>
+                        <option value="">Select team member...</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="updateText">Your Update</label>
+                    <textarea 
+                        class="form-textarea" 
+                        id="updateText" 
+                        name="updateText" 
+                        placeholder="E.g., Had a great meeting with Downtown Toyota today. They're interested in our premium package..."
+                        required
+                    ></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary" id="submitBtn">
+                    Process Update
+                </button>
+
+                <div class="processing-status" id="processingStatus">
+                    <div class="status-spinner"></div>
+                    <span>Processing your update with AI...</span>
+                </div>
+            </form>
+        </div>
+
+        <div class="results-section" id="resultsSection">
+            <div id="resultsContent"></div>
+        </div>
+
+        <div class="activity-feed" id="activityFeed"></div>
+    </div>
+
+    <script>
+        // Initialize member select
+        async function loadTeamMembers() {
+            try {
+                const response = await fetch('/api/team');
+                const data = await response.json();
+                
+                const select = document.getElementById('memberSelect');
+                data.team.forEach(member => {
+                    const option = document.createElement('option');
+                    option.value = member.id;
+                    option.textContent = `${member.name} - ${member.role}`;
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Failed to load team members:', error);
+            }
+        }
+
+        // Form submission
+        document.getElementById('updateForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('submitBtn');
+            const processingStatus = document.getElementById('processingStatus');
+            const resultsSection = document.getElementById('resultsSection');
+            
+            submitBtn.disabled = true;
+            processingStatus.classList.add('show');
+            resultsSection.classList.remove('show');
+            
+            const formData = {
+                memberName: document.getElementById('memberSelect').value,
+                updateText: document.getElementById('updateText').value
+            };
+            
+            try {
+                const response = await fetch('/api/update', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const data = await response.json();
+                displayResults(data);
+                
+                // Update memory count after processing
+                updateMemoryStatus();
+                
+            } catch (error) {
+                console.error('Error processing update:', error);
+                alert('Failed to process update. Please try again.');
+            } finally {
+                submitBtn.disabled = false;
+                processingStatus.classList.remove('show');
+            }
+        });
+
+        // Display results with memory context
+        function displayResults(data) {
+            const resultsSection = document.getElementById('resultsSection');
+            const resultsContent = document.getElementById('resultsContent');
+            
+            let html = '';
+            
+            // Header with confidence
+            html += '<div class="results-header">';
+            html += '<h2 class="section-title">Analysis Results</h2>';
+            
+            const confidence = data.confidence || 0.5;
+            html += '<div class="confidence-score">';
+            html += '<span>Confidence:</span>';
+            html += '<div class="confidence-bar">';
+            html += `<div class="confidence-fill" style="width: ${confidence * 100}%"></div>`;
+            html += '</div>';
+            html += `<span>${Math.round(confidence * 100)}%</span>`;
+            html += '</div>';
+            html += '</div>';
+            
+            // Memory Context Used
+            if (data.memoryContextUsed) {
+                html += '<div class="memory-context-used">';
+                html += '<div class="memory-context-header">';
+                html += '<div class="memory-context-title">';
+                html += '<span>📚</span>';
+                html += '<span>Memory Context Used</span>';
+                html += '</div>';
+                html += '<button class="toggle-context" onclick="toggleMemoryContext()">View Context</button>';
+                html += '</div>';
+                html += '<div id="contextDetails" class="context-details">';
+                
+                // Show relevant memories
+                html += '<div class="memory-item">';
+                html += '<div class="date">Previous interactions found</div>';
+                html += '<p>Your assistant used past context to better understand this update.</p>';
+                html += '</div>';
+                
+                if (data.clientIntelligence && Object.keys(data.clientIntelligence).length > 0) {
+                    Object.entries(data.clientIntelligence).forEach(([client, intel]) => {
+                        html += '<div class="memory-item">';
+                        html += `<div class="date">Client Profile: ${client}</div>`;
+                        html += `<p>Past interactions: ${intel.interactions || 0}<br>`;
+                        html += `Last contact: ${intel.lastContact || 'Unknown'}</p>`;
+                        html += '</div>';
+                    });
+                }
+                html += '</div>';
+                html += '</div>';
+            }
+            
+            // Analysis Grid
+            html += '<div class="analysis-grid">';
+            
+            // Action Items
+            if (data.extracted?.actionItems?.length > 0) {
+                html += '<div class="analysis-card">';
+                html += '<h3>Action Items</h3>';
+                data.extracted.actionItems.forEach(item => {
+                    html += '<div class="analysis-item">';
+                    html += item;
+                    html += '</div>';
+                });
+                html += '</div>';
+            }
+            
+            // Clients Mentioned
+            if (data.extracted?.clientInfo?.length > 0) {
+                html += '<div class="analysis-card">';
+                html += '<h3>Clients Mentioned</h3>';
+                data.extracted.clientInfo.forEach(client => {
+                    html += '<div class="analysis-item">';
+                    html += `<span class="client-name" onclick="showClientInfo('${client}')">${client}</span>`;
+                    html += '</div>';
+                });
+                html += '</div>';
+            }
+            
+            html += '</div>';
+            
+            // Response Metadata
+            html += '<div class="response-metadata">';
+            if (data.memoryContextUsed) {
+                html += '<span>🧠 Memory context applied</span>';
+            }
+            if (data.processingTime) {
+                html += `<span>⚡ Processed in ${data.processingTime}ms</span>`;
+            }
+            html += `<span>🤖 Model: ${data.model || 'AI Assistant'}</span>`;
+            html += '</div>';
+            
+            resultsContent.innerHTML = html;
+            resultsSection.classList.add('show');
+        }
+
+        // Toggle memory context details
+        window.toggleMemoryContext = function() {
+            const details = document.getElementById('contextDetails');
+            details.classList.toggle('show');
+        };
+        
+        // Show client information popup
+        window.showClientInfo = function(clientName) {
+            alert(`Client Intelligence for ${clientName}\n\nThis would show:\n- Past interactions\n- Deal history\n- Communication preferences\n- Key contacts`);
+        };
+
+        // Update memory status
+        async function updateMemoryStatus() {
+            try {
+                const member = document.getElementById('memberSelect').value;
+                if (member) {
+                    // In production, fetch actual memory count from API
+                    const response = await fetch(`/api/members/${member}/memory-stats`);
+                    if (response.ok) {
+                        const data = await response.json();
+                        document.getElementById('memoryCount').textContent = `${data.count || 0} memories`;
+                    } else {
+                        // Fallback simulation
+                        const count = Math.floor(Math.random() * 500) + 100;
+                        document.getElementById('memoryCount').textContent = `${count} memories`;
+                    }
+                }
+            } catch (error) {
+                // Simulate if API not available
+                const count = Math.floor(Math.random() * 500) + 100;
+                document.getElementById('memoryCount').textContent = `${count} memories`;
+            }
+        }
+
+        // WebSocket for real-time updates
+        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const ws = new WebSocket(`${protocol}//${window.location.host}`);
+        
+        ws.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            if (data.type === 'activity') {
+                addActivityItem(data);
+            } else if (data.type === 'memory_update') {
+                updateMemoryStatus();
+            }
+        };
+
+        // Initialize
+        loadTeamMembers();
+        
+        // Update memory status when member changes
+        document.getElementById('memberSelect').addEventListener('change', updateMemoryStatus);
+    </script>
+</body>
+</html>

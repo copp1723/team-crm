@@ -23,6 +23,7 @@ import { AdminAPI } from './api/admin-api.js';
 import { CalendarAPI } from './api/calendar-api.js';
 import { EnhancedAPIResponse } from './api/enhanced-api-response.js';
 import { ValidationMiddleware } from './middleware/validation.js';
+import { registerMemoryStatsAPI } from './api/memory-stats-api.js';
 import { EnhancedRateLimitingMiddleware } from './middleware/enhanced-rate-limiting.js';
 import { ActivityLoggerMiddleware } from './middleware/activity-logger.js';
 import { setupAuth } from './middleware/auth.js';
@@ -131,6 +132,9 @@ export class TeamCRMServer {
             // Initialize calendar API
             this.calendarAPI = new CalendarAPI(this.orchestrator);
             this.calendarAPI.registerEndpoints(this.app);
+            
+            // Initialize memory stats API
+            registerMemoryStatsAPI(this.app, this.orchestrator);
             
             // Initialize webhook system
             this.webhookManager = new WebhookManager(this.orchestrator.notificationSystem);
