@@ -13,6 +13,8 @@
     "user:import": "node scripts/bulk-import-users.js",
     "assistant:manage": "node scripts/manage-personal-assistants.js",
     "db:setup": "node scripts/setup-database.js",
+    "db:render": "node scripts/render-db-setup.js",
+    "verify": "node scripts/verify-render-setup.js",
     "analyze": "node cleanup-analysis.js",
     "cleanup": "node scripts/cleanup.js",
     "cleanup:dry-run": "node cleanup-analysis.js",
