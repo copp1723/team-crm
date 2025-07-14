@@ -3,39 +3,43 @@
  * This is how it SHOULD work - each assistant learns and remembers
  */
 
-import { SimplePersonalAssistant } from './simple-personal-assistant.js';
+import { PersonalAssistant } from './simple-personal-assistant.js';
 import { logger } from '../../utils/logger.js';
 import { CalendarService } from '../calendar/calendar-service.js';
 import { CalendarIntelligence } from '../calendar/calendar-intelligence.js';
 import { MeetingProcessor } from '../calendar/meeting-processor.js';
 import { EnhancedMemoryIntegration } from '../memory/enhanced-memory-integration.js';
 
-export class EnhancedPersonalAssistant extends SimplePersonalAssistant {
-    constructor(config) {
-        super(config);
-        
-        this.logger = logger.child({ 
+export class EnhancedPersonalAssistant extends PersonalAssistant {
+    constructor(memberConfig, globalConfig, memorySystem) {
+        super(memberConfig, globalConfig);
+
+        this.config = memberConfig;
+        this.globalConfig = globalConfig;
+        this.memorySystem = memorySystem;
+
+        this.logger = logger.child({
             component: 'EnhancedPersonalAssistant',
-            assistant: this.config.name,
-            memberId: this.config.memberId
+            assistant: this.memberName,
+            memberId: this.memberKey
         });
         
         // Initialize Supermemory - THIS IS THE KEY DIFFERENCE
-        if (this.config.supermemoryConfig?.apiKey && this.config.supermemoryConfig?.spaceId) {
+        if (this.globalConfig?.memory?.enabled && process.env.SUPERMEMORY_API_KEY) {
             this.memory = new EnhancedMemoryIntegration({
-                apiKey: this.config.supermemoryConfig.apiKey,
-                collection: this.config.supermemoryConfig.spaceId,
-                baseUrl: this.config.supermemoryConfig.baseUrl
+                apiKey: process.env.SUPERMEMORY_API_KEY,
+                collection: this.memberKey,
+                baseUrl: this.globalConfig.memory?.settings?.baseUrl || "https://api.supermemory.ai"
             });
             this.logger.info('Supermemory initialized for assistant', {
-                spaceId: this.config.supermemoryConfig.spaceId
+                spaceId: this.memberKey
             });
         } else {
             this.logger.warn('No Supermemory configuration - assistant will have no memory!');
         }
-        
+
         // Calendar services
-        this.calendarService = new CalendarService({ memberName: this.config.name });
+        this.calendarService = new CalendarService({ memberName: this.memberName });
         this.calendarIntelligence = new CalendarIntelligence();
         this.meetingProcessor = new MeetingProcessor();
         
@@ -66,7 +70,7 @@ export class EnhancedPersonalAssistant extends SimplePersonalAssistant {
                 contextualMemories = await this.memory.searchMemories({
                     query: updateText,
                     filters: {
-                        userId: this.config.memberId,
+                        userId: this.memberKey,
                         types: ['update', 'email', 'meeting'],
                         limit: 10
                     }
@@ -126,7 +130,7 @@ export class EnhancedPersonalAssistant extends SimplePersonalAssistant {
             
             return {
                 ...analysis,
-                assistant: this.config.name,
+                assistant: this.memberName,
                 processingTime,
                 memoryContextUsed: contextualMemories.length > 0,
                 clientIntelligence: clientProfiles
@@ -143,7 +147,7 @@ export class EnhancedPersonalAssistant extends SimplePersonalAssistant {
      * Build AI prompt with memory context
      */
     buildPromptWithMemory(updateText, memories, clientProfiles, calendarContext) {
-        let prompt = `You are ${this.config.name}'s personal AI assistant with access to historical context.\n\n`;
+        let prompt = `You are ${this.memberName}'s personal AI assistant with access to historical context.\n\n`;
         
         // Add client intelligence
         if (Object.keys(clientProfiles).length > 0) {
@@ -197,7 +201,7 @@ export class EnhancedPersonalAssistant extends SimplePersonalAssistant {
         try {
             await this.memory.storeMemory({
                 type: 'update',
-                userId: this.config.memberId,
+                userId: this.memberKey,
                 content: {
                     text: updateText,
                     date: new Date().toISOString(),
@@ -230,7 +234,7 @@ export class EnhancedPersonalAssistant extends SimplePersonalAssistant {
                     type: 'deal_value_extraction',
                     pattern: this.extractSurroundingText(updateText, extractedData.deal_value),
                     extraction: extractedData.deal_value,
-                    userId: this.config.memberId
+                    userId: this.memberKey
                 });
             }
             
@@ -240,7 +244,7 @@ export class EnhancedPersonalAssistant extends SimplePersonalAssistant {
                     type: 'urgency_indicator',
                     pattern: updateText,
                     indicator: 'high_urgency',
-                    userId: this.config.memberId
+                    userId: this.memberKey
                 });
             }
             
@@ -250,7 +254,7 @@ export class EnhancedPersonalAssistant extends SimplePersonalAssistant {
                     type: 'meeting_request',
                     pattern: updateText,
                     outcome: 'identified',
-                    userId: this.config.memberId
+                    userId: this.memberKey
                 });
             }
             

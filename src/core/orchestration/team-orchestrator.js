@@ -10,7 +10,7 @@
  * - Provides API endpoints for team input
  */
 
-import { PersonalAssistant } from '../agents/enhanced-personal-assistant.js';
+import { EnhancedPersonalAssistant } from '../agents/enhanced-personal-assistant.js';
 import { MasterExecutiveAgent } from '../agents/simple-master-agent.js';
 import { EnhancedMemoryIntegration } from '../memory/enhanced-memory-integration.js';
 import { TeamNotificationSystem } from '../notifications/team-notification-system.js';
@@ -113,7 +113,7 @@ export class TeamOrchestrator extends EventEmitter {
             try {
                 logger.info(`Initializing personal assistant for ${memberConfig.name}...`);
                 
-                const assistant = new PersonalAssistant(memberConfig, this.config, this.memorySystem);
+                const assistant = new EnhancedPersonalAssistant(memberConfig, this.config, this.memorySystem);
                 this.personalAssistants.set(memberKey, assistant);
                 
                 logger.info(`✅ Personal assistant ready for ${memberConfig.name}`);
