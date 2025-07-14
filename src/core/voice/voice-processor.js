@@ -3,7 +3,7 @@
  * Handles voice input processing, commands, and integration with team updates
  */
 
-import { SpeechToText } from './speech-to-text.js';
+import { SpeechToText } from '/src/core/voice/speech-to-text.js';
 
 export class VoiceProcessor {
     constructor(options = {}) {

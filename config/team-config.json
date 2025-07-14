@@ -67,6 +67,38 @@
           "action_items"
         ],
         "ai_model": "claude-3-sonnet"
+      },
+      "kyle": {
+        "id": "kyle",
+        "name": "Kyle Olinger",
+        "role": "Operations",
+        "focus_areas": [
+          "operational_efficiency",
+          "process_optimization",
+          "system_management"
+        ],
+        "extraction_priorities": [
+          "operational_issues",
+          "process_improvements",
+          "system_updates"
+        ],
+        "ai_model": "claude-3-sonnet"
+      },
+      "amanda": {
+        "id": "amanda",
+        "name": "Amanda",
+        "role": "Operations",
+        "focus_areas": [
+          "operational_support",
+          "workflow_management",
+          "quality_assurance"
+        ],
+        "extraction_priorities": [
+          "operational_updates",
+          "workflow_issues",
+          "quality_metrics"
+        ],
+        "ai_model": "claude-3-sonnet"
       }
     },
     "executives": [

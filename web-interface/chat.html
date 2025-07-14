@@ -925,7 +925,7 @@
         // Voice input initialization
         async function initializeVoiceInput() {
             try {
-                const { initVoiceButton } = await import('/web-interface/voice-button-component.js');
+                const { initVoiceButton } = await import('/static/voice-button-component.js');
                 
                 window.voiceButton = initVoiceButton({
                     containerId: 'voice-button-container',

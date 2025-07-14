@@ -212,8 +212,25 @@ export class TeamCRMServer {
         // Serve static files for web interface
         const webInterfacePath = path.join(__dirname, '../web-interface');
         const publicPath = path.join(__dirname, '../public');
+        const srcPath = path.join(__dirname, '../src'); // For ES6 module imports
+        
         this.app.use('/static', express.static(webInterfacePath));
         this.app.use(express.static(publicPath)); // Serve favicon and other static assets
+        
+        // Serve source files for ES6 module imports (with proper MIME type)
+        this.app.use('/src', express.static(srcPath, {
+            setHeaders: (res, path) => {
+                if (path.endsWith('.js')) {
+                    res.setHeader('Content-Type', 'application/javascript');
+                }
+            }
+        }));
+        
+        logger.info('Static file serving configured:', {
+            webInterface: webInterfacePath,
+            public: publicPath,
+            src: srcPath
+        });
         
         // Request logging
         this.app.use((req, res, next) => {
@@ -847,6 +864,18 @@ export class TeamCRMServer {
                     'connect to ws://host:port': 'Real-time updates and notifications'
                 }
             });
+        });
+        
+        // Voice input route (MISSING - this is causing the 404)
+        this.app.get('/voice-input', async (req, res) => {
+            try {
+                logger.info('Voice input route accessed - this was missing!');
+                const html = await fs.readFile(path.join(__dirname, '../web-interface/voice-input.html'), 'utf8');
+                res.send(html);
+            } catch (error) {
+                logger.error('Error loading voice input interface:', error);
+                res.status(500).send('Error loading voice input interface');
+            }
         });
     }
     
