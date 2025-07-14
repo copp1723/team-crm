@@ -590,21 +590,7 @@
         // Current user
         let currentUser = 'joe';
 
-        // User selection
-        document.querySelectorAll('.user-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                document.querySelectorAll('.user-btn').forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
-                currentUser = this.dataset.user;
-                
-                // Clear any existing password for security when switching users
-                Object.keys(sessionStorage).forEach(key => {
-                    if (key.endsWith('_password')) {
-                        sessionStorage.removeItem(key);
-                    }
-                });
-            });
-        });
+        // User selection is now handled by setupUserButtons() after dynamic loading
 
         // Character counter
         const updateText = document.getElementById('update-text');
@@ -913,8 +899,81 @@
             }
         }
 
+        // Load team members dynamically
+        async function loadTeamMembers() {
+            try {
+                const response = await fetch('/api/team');
+                if (response.ok) {
+                    const members = await response.json();
+                    const userSelect = document.getElementById('user-select');
+                    
+                    if (members && members.length > 0) {
+                        members.forEach((member, index) => {
+                            const button = document.createElement('button');
+                            button.className = `user-btn ${index === 0 ? 'active' : ''}`;
+                            button.dataset.user = member.id || member.key;
+                            button.textContent = member.name;
+                            userSelect.appendChild(button);
+                        });
+                        
+                        // Set first member as current user
+                        if (members[0]) {
+                            currentUser = members[0].id || members[0].key;
+                        }
+                        
+                        // Add event listeners to new buttons
+                        setupUserButtons();
+                    } else {
+                        // Fallback to hardcoded users if API returns empty
+                        userSelect.innerHTML = `
+                            <button class="user-btn active" data-user="joe">Joe</button>
+                            <button class="user-btn" data-user="charlie">Charlie</button>
+                        `;
+                        setupUserButtons();
+                    }
+                } else {
+                    console.error('Failed to load team members');
+                    // Fallback to hardcoded users
+                    const userSelect = document.getElementById('user-select');
+                    userSelect.innerHTML = `
+                        <button class="user-btn active" data-user="joe">Joe</button>
+                        <button class="user-btn" data-user="charlie">Charlie</button>
+                    `;
+                    setupUserButtons();
+                }
+            } catch (error) {
+                console.error('Error loading team members:', error);
+                // Fallback to hardcoded users
+                const userSelect = document.getElementById('user-select');
+                userSelect.innerHTML = `
+                    <button class="user-btn active" data-user="joe">Joe</button>
+                    <button class="user-btn" data-user="charlie">Charlie</button>
+                `;
+                setupUserButtons();
+            }
+        }
+        
+        // Setup user button event listeners
+        function setupUserButtons() {
+            document.querySelectorAll('.user-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.user-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    currentUser = this.dataset.user;
+                    
+                    // Clear any existing password for security when switching users
+                    Object.keys(sessionStorage).forEach(key => {
+                        if (key.endsWith('_password')) {
+                            sessionStorage.removeItem(key);
+                        }
+                    });
+                });
+            });
+        }
+
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', function() {
+            loadTeamMembers();
             initializeWebSocket();
             
             // Initialize voice input button

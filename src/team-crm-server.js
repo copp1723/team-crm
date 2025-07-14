@@ -316,9 +316,38 @@ export class TeamCRMServer {
         // Team members
         this.app.get('/api/team', (req, res) => {
             try {
-                const members = this.orchestrator ? this.orchestrator.getTeamMembers() : [];
+                logger.info('Team API called - checking orchestrator state');
+                
+                if (!this.orchestrator) {
+                    logger.warn('Orchestrator not initialized');
+                    res.json([]);
+                    return;
+                }
+                
+                const members = this.orchestrator.getTeamMembers();
+                logger.info('Team members retrieved', {
+                    count: members.length,
+                    members: members.map(m => ({ key: m.key, name: m.name, role: m.role }))
+                });
+                
+                // Fallback if orchestrator returns empty but config exists
+                if (members.length === 0 && this.config?.team?.members) {
+                    logger.info('Using fallback team members from config');
+                    const fallbackMembers = Object.entries(this.config.team.members).map(([key, config]) => ({
+                        key,
+                        id: config.id || key,
+                        name: config.name,
+                        role: config.role,
+                        capabilities: config.extraction_priorities || [],
+                        focusAreas: config.focus_areas || []
+                    }));
+                    res.json(fallbackMembers);
+                    return;
+                }
+                
                 res.json(members);
             } catch (error) {
+                logger.error('Error in team API:', error);
                 res.status(500).json({ error: error.message });
             }
         });
@@ -878,17 +907,6 @@ export class TeamCRMServer {
             }
         });
         
-        // Enhanced chat route
-        this.app.get('/enhanced-chat', async (req, res) => {
-            try {
-                logger.info('Enhanced chat route accessed');
-                const html = await fs.readFile(path.join(__dirname, '../web-interface/enhanced-chat.html'), 'utf8');
-                res.send(html);
-            } catch (error) {
-                logger.error('Error loading enhanced chat interface:', error);
-                res.status(500).send('Error loading enhanced chat interface');
-            }
-        });
     }
     
     /**
