@@ -29,18 +29,19 @@ export class RealAIProcessor {
     /**
      * Process team update with real AI analysis
      */
-    async processTeamUpdate(memberName, updateText, memberConfig = {}) {
+    async processTeamUpdate(memberName, updateText, memberConfig = {}, memoryContext = null) {
         const startTime = Date.now();
         
         try {
             this.logger.info('Processing team update with AI', {
                 memberName,
-                textLength: updateText.length
+                textLength: updateText.length,
+                hasMemoryContext: !!memoryContext
             });
 
             // Create context-aware prompt
             const systemPrompt = this.buildSystemPrompt(memberName, memberConfig);
-            const analysisPrompt = this.buildAnalysisPrompt(updateText, memberName, memberConfig);
+            const analysisPrompt = this.buildAnalysisPromptWithMemory(updateText, memberName, memberConfig, memoryContext);
 
             // Make AI request with retries
             const response = await this.makeAIRequest(systemPrompt, analysisPrompt);
@@ -102,14 +103,60 @@ Oh, one more thing - can you format your thoughts as JSON? Makes it easier for m
     }
 
     /**
-     * Build analysis prompt for specific update
+     * Build analysis prompt with memory context
+     */
+    buildAnalysisPromptWithMemory(updateText, memberName, memberConfig, memoryContext) {
+        let prompt = '';
+        
+        // Add memory context if available
+        if (memoryContext && memoryContext.recentMemories && memoryContext.recentMemories.length > 0) {
+            prompt += `Hey! Before we dive into the new update, here's some context from ${memberName}'s recent activity:\n\n`;
+            
+            memoryContext.recentMemories.slice(0, 5).forEach((memory, index) => {
+                const content = memory.content;
+                prompt += `${index + 1}. ${content.date || 'Recently'}: ${content.text || content.summary}\n`;
+                if (content.extracted && content.extracted.client_mentioned) {
+                    prompt += `   - Clients mentioned: ${content.extracted.client_mentioned.join(', ')}\n`;
+                }
+                if (content.extracted && content.extracted.deal_value) {
+                    prompt += `   - Deal value: $${content.extracted.deal_value}\n`;
+                }
+            });
+            
+            prompt += '\n';
+            
+            // Add client profiles if available
+            if (memoryContext.clientProfiles && Object.keys(memoryContext.clientProfiles).length > 0) {
+                prompt += `Also, here's what I know about the clients that might be mentioned:\n`;
+                for (const [client, profile] of Object.entries(memoryContext.clientProfiles)) {
+                    prompt += `- ${client}: ${JSON.stringify(profile)}\n`;
+                }
+                prompt += '\n';
+            }
+            
+            prompt += `Now, with this context in mind, ${memberName} just posted this update:\n\n`;
+        } else {
+            prompt += `Alright, so ${memberName} just posted this update:\n\n`;
+        }
+        
+        prompt += `"${updateText}"\n\n`;
+        prompt += this.getAnalysisInstructions();
+        
+        return prompt;
+    }
+    
+    /**
+     * Build analysis prompt for specific update (legacy without memory)
      */
     buildAnalysisPrompt(updateText, memberName, memberConfig) {
-        return `Alright, so ${memberName} just posted this update:
-
-"${updateText}"
-
-Can you work your magic and help me figure out what we need to pay attention to here? I've got this template that helps me stay organized - just fill it in with what you spot:
+        return this.buildAnalysisPromptWithMemory(updateText, memberName, memberConfig, null);
+    }
+    
+    /**
+     * Get analysis instructions template
+     */
+    getAnalysisInstructions() {
+        return `Can you work your magic and help me figure out what we need to pay attention to here? I've got this template that helps me stay organized - just fill it in with what you spot:
 
 {
   "actionItems": [
