@@ -21,3 +21,5 @@ services:
         sync: false
       - key: TRE_PASSWORD
         sync: false
+      - key: JOSH_PASSWORD
+        sync: false
