@@ -877,6 +877,18 @@ export class TeamCRMServer {
                 res.status(500).send('Error loading voice input interface');
             }
         });
+        
+        // Enhanced chat route
+        this.app.get('/enhanced-chat', async (req, res) => {
+            try {
+                logger.info('Enhanced chat route accessed');
+                const html = await fs.readFile(path.join(__dirname, '../web-interface/enhanced-chat.html'), 'utf8');
+                res.send(html);
+            } catch (error) {
+                logger.error('Error loading enhanced chat interface:', error);
+                res.status(500).send('Error loading enhanced chat interface');
+            }
+        });
     }
     
     /**
