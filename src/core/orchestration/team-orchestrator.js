@@ -107,21 +107,78 @@ export class TeamOrchestrator extends EventEmitter {
      * Initialize personal assistants for each team member
      */
     async initializePersonalAssistants() {
-        const members = this.config.team.members;
+        let members;
         
-        for (const [memberKey, memberConfig] of Object.entries(members)) {
+        try {
+            // Try to load team members from database first
+            members = await this.loadTeamMembersFromDatabase();
+            logger.info(`Loaded ${members.length} team members from database`);
+        } catch (error) {
+            logger.warn('Failed to load team members from database, falling back to config file', { error: error.message });
+            // Fall back to config file
+            members = Object.entries(this.config.team.members).map(([key, config]) => ({
+                external_id: key,
+                name: config.name,
+                role: config.role,
+                focus_areas: config.focus_areas,
+                extraction_priorities: config.extraction_priorities,
+                ai_model: config.ai_model
+            }));
+        }
+        
+        for (const member of members) {
             try {
-                logger.info(`Initializing personal assistant for ${memberConfig.name}...`);
+                logger.info(`Initializing personal assistant for ${member.name}...`);
+                
+                // Create memberConfig in the expected format
+                const memberConfig = {
+                    id: member.external_id,
+                    name: member.name,
+                    role: member.role,
+                    focus_areas: member.focus_areas || ["dealer_relationships", "sales_activities"],
+                    extraction_priorities: member.extraction_priorities || ["dealer_feedback", "meeting_notes", "action_items"],
+                    ai_model: member.ai_model || "claude-3-sonnet"
+                };
                 
                 const assistant = new EnhancedPersonalAssistant(memberConfig, this.config, this.memorySystem);
-                this.personalAssistants.set(memberKey, assistant);
+                this.personalAssistants.set(member.external_id, assistant);
                 
-                logger.info(`✅ Personal assistant ready for ${memberConfig.name}`);
+                logger.info(`✅ Personal assistant ready for ${member.name}`);
                 
             } catch (error) {
-                logger.error(`Error initializing assistant for ${memberConfig.name}`, { error });
+                logger.error(`Error initializing assistant for ${member.name}`, { error });
                 throw error;
             }
+        }
+    }
+
+    /**
+     * Load team members from database
+     */
+    async loadTeamMembersFromDatabase() {
+        try {
+            const { createConnection } = await import('../../utils/database-pool.js');
+            const db = createConnection();
+            
+            const result = await db.query(`
+                SELECT 
+                    external_id,
+                    name,
+                    role,
+                    focus_areas,
+                    extraction_priorities,
+                    ai_model,
+                    active
+                FROM team_members 
+                WHERE active = true
+                ORDER BY name
+            `);
+            
+            await db.end();
+            return result.rows;
+        } catch (error) {
+            logger.error('Error loading team members from database', { error });
+            throw error;
         }
     }
     

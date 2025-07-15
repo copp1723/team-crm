@@ -90,6 +90,20 @@ export class AdminAPI {
                     });
                 }
 
+                // Also add to database
+                try {
+                    await this.addTeamMemberToDatabase(username, {
+                        name: name,
+                        role: role,
+                        focus_areas: ["dealer_relationships", "sales_activities"],
+                        extraction_priorities: ["dealer_feedback", "meeting_notes", "action_items"],
+                        ai_model: "claude-3-sonnet"
+                    });
+                } catch (dbError) {
+                    console.warn('Failed to add team member to database:', dbError.message);
+                    // Continue with config update even if database update fails
+                }
+
                 await this.saveConfig(config);
                 await this.updateAuthFile(config.team.members);
 
@@ -116,10 +130,18 @@ export class AdminAPI {
                     return res.status(404).json({ error: 'Hmm, can\'t find that user. Double-check the username?' });
                 }
 
-                // Update member info
+                // Update member info in config
                 if (name) config.team.members[username].name = name;
                 if (role) config.team.members[username].role = role;
                 if (focus_areas) config.team.members[username].focus_areas = focus_areas;
+
+                // Update in database as well
+                try {
+                    await this.updateTeamMemberInDatabase(username, { name, role, focus_areas });
+                } catch (dbError) {
+                    console.warn('Failed to update team member in database:', dbError.message);
+                    // Continue with config update even if database update fails
+                }
 
                 // Update executive status
                 const execIndex = config.team.executives.findIndex(e => e.id === username);
@@ -137,6 +159,10 @@ export class AdminAPI {
                 } else if (!isExecutive && execIndex !== -1) {
                     // Remove from executives
                     config.team.executives.splice(execIndex, 1);
+                } else if (isExecutive && execIndex !== -1) {
+                    // Update existing executive info
+                    config.team.executives[execIndex].name = name || config.team.executives[execIndex].name;
+                    config.team.executives[execIndex].role = role || config.team.executives[execIndex].role;
                 }
 
                 await this.saveConfig(config);
@@ -359,6 +385,38 @@ export class AdminAPI {
             }
         });
 
+        // Sync config to database
+        router.post('/sync-to-database', async (req, res) => {
+            try {
+                const config = await this.loadConfig();
+                let syncedCount = 0;
+                
+                for (const [username, memberConfig] of Object.entries(config.team.members)) {
+                    try {
+                        await this.addTeamMemberToDatabase(username, {
+                            name: memberConfig.name,
+                            role: memberConfig.role,
+                            focus_areas: memberConfig.focus_areas,
+                            extraction_priorities: memberConfig.extraction_priorities,
+                            ai_model: memberConfig.ai_model
+                        });
+                        syncedCount++;
+                    } catch (error) {
+                        console.warn(`Failed to sync ${username}:`, error.message);
+                    }
+                }
+                
+                res.json({ 
+                    success: true, 
+                    message: `Synced ${syncedCount} team members to database`,
+                    syncedCount 
+                });
+                
+            } catch (error) {
+                res.status(500).json({ error: error.message });
+            }
+        });
+
         // Clear cache
         router.delete('/cache', async (req, res) => {
             try {
@@ -423,6 +481,94 @@ export class AdminAPI {
         );
         
         await fs.writeFile(this.authPath, newAuthContent);
+    }
+
+    /**
+     * Add team member to database
+     */
+    async addTeamMemberToDatabase(username, memberData) {
+        try {
+            const { createConnection } = await import('../utils/database-pool.js');
+            const db = createConnection();
+            
+            await db.query(`
+                INSERT INTO team_members 
+                (external_id, name, role, focus_areas, extraction_priorities, ai_model, active, created_at, updated_at)
+                VALUES ($1, $2, $3, $4, $5, $6, true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+                ON CONFLICT (external_id) DO UPDATE SET
+                    name = EXCLUDED.name,
+                    role = EXCLUDED.role,
+                    focus_areas = EXCLUDED.focus_areas,
+                    extraction_priorities = EXCLUDED.extraction_priorities,
+                    ai_model = EXCLUDED.ai_model,
+                    active = EXCLUDED.active,
+                    updated_at = CURRENT_TIMESTAMP
+            `, [
+                username,
+                memberData.name,
+                memberData.role,
+                memberData.focus_areas,
+                memberData.extraction_priorities,
+                memberData.ai_model
+            ]);
+            
+            await db.end();
+            console.log(`Added/updated team member ${username} in database`);
+        } catch (error) {
+            console.error(`Failed to add team member ${username} to database:`, error);
+            throw error;
+        }
+    }
+
+    /**
+     * Update team member in database
+     */
+    async updateTeamMemberInDatabase(username, updates) {
+        try {
+            const { createConnection } = await import('../utils/database-pool.js');
+            const db = createConnection();
+            
+            const setParts = [];
+            const values = [];
+            let valueIndex = 1;
+            
+            if (updates.name) {
+                setParts.push(`name = $${valueIndex++}`);
+                values.push(updates.name);
+            }
+            
+            if (updates.role) {
+                setParts.push(`role = $${valueIndex++}`);
+                values.push(updates.role);
+            }
+            
+            if (updates.focus_areas) {
+                setParts.push(`focus_areas = $${valueIndex++}`);
+                values.push(updates.focus_areas);
+            }
+            
+            if (setParts.length === 0) {
+                await db.end();
+                return;
+            }
+            
+            setParts.push(`updated_at = CURRENT_TIMESTAMP`);
+            values.push(username);
+            
+            const query = `
+                UPDATE team_members 
+                SET ${setParts.join(', ')}
+                WHERE external_id = $${valueIndex}
+            `;
+            
+            await db.query(query, values);
+            await db.end();
+            
+            console.log(`Updated team member ${username} in database`);
+        } catch (error) {
+            console.error(`Failed to update team member ${username} in database:`, error);
+            throw error;
+        }
     }
 
     /**
