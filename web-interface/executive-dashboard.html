@@ -485,12 +485,14 @@
             let recipient = '';
             let cleanMessage = message;
             
-            if (message.startsWith('@joe ')) {
-                recipient = 'joe';
-                cleanMessage = message.substring(5);
-            } else if (message.startsWith('@charlie ')) {
-                recipient = 'charlie';
-                cleanMessage = message.substring(9);
+            // Check for @mentions dynamically based on loaded team members
+            for (const member of window.teamMembers || []) {
+                const mention = `@${member.id} `;
+                if (message.startsWith(mention)) {
+                    recipient = member.id;
+                    cleanMessage = message.substring(mention.length);
+                    break;
+                }
             }
             
             try {
@@ -587,8 +589,24 @@
             return `${Math.floor(seconds / 86400)}d ago`;
         }
 
+        // Load team members dynamically
+        async function loadTeamMembers() {
+            try {
+                const response = await fetch('/api/team');
+                if (response.ok) {
+                    const members = await response.json();
+                    window.teamMembers = members;
+                    console.log('Loaded team members:', members.map(m => m.name));
+                }
+            } catch (error) {
+                console.error('Error loading team members:', error);
+                window.teamMembers = [];
+            }
+        }
+
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', function() {
+            loadTeamMembers();
             loadInitialData();
             initializeWebSocket();
         });

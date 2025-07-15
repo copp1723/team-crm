@@ -504,6 +504,18 @@
                             <input type="text" class="form-input" id="edit-focus" 
                                    placeholder="dealer_relationships, strategic_accounts, pilot_success">
                         </div>
+                        <div class="form-group">
+                            <label class="form-label">AI Assistant Email</label>
+                            <input type="email" class="form-input" id="edit-email" 
+                                   placeholder="joe.assistant@mailgun.domain.com">
+                            <small class="form-help">Email address for team members to forward emails to this assistant</small>
+                        </div>
+                        <div class="form-group">
+                            <div class="form-checkbox">
+                                <input type="checkbox" id="edit-email-enabled">
+                                <label for="edit-email-enabled">Enable email processing for this assistant</label>
+                            </div>
+                        </div>
                         <div class="form-group full-width">
                             <div class="form-checkbox">
                                 <input type="checkbox" id="edit-executive">
@@ -854,6 +866,9 @@
             document.getElementById('edit-role').value = user.role;
             document.getElementById('edit-focus').value = user.focus_areas?.join(', ') || '';
             document.getElementById('edit-executive').checked = user.isExecutive || false;
+            
+            // Load email configuration for this user
+            loadUserEmailConfig(username);
         }
 
         function cancelEdit() {
@@ -917,6 +932,16 @@
                 focus_areas: document.getElementById('edit-focus').value.split(',').map(f => f.trim()).filter(f => f),
                 isExecutive: document.getElementById('edit-executive').checked
             };
+            
+            // Save email configuration separately
+            const emailConfig = {
+                email: document.getElementById('edit-email').value,
+                enabled: document.getElementById('edit-email-enabled').checked
+            };
+            
+            if (emailConfig.email) {
+                await saveUserEmailConfig(currentEditUser, emailConfig);
+            }
             
             try {
                 const response = await fetch(`/api/admin/users/${currentEditUser}`, {
@@ -1197,6 +1222,48 @@
             setTimeout(() => {
                 statusDiv.style.display = 'none';
             }, 5000);
+        }
+
+        // Email configuration functions
+        async function loadUserEmailConfig(username) {
+            try {
+                const response = await fetch('/api/admin/email-config');
+                if (!response.ok) throw new Error('Failed to load email config');
+                
+                const emailConfig = await response.json();
+                const userConfig = emailConfig.assistants?.[username];
+                
+                if (userConfig) {
+                    document.getElementById('edit-email').value = userConfig.email || '';
+                    document.getElementById('edit-email-enabled').checked = userConfig.enabled || false;
+                } else {
+                    document.getElementById('edit-email').value = '';
+                    document.getElementById('edit-email-enabled').checked = false;
+                }
+                
+            } catch (error) {
+                console.warn('Error loading email config:', error.message);
+                document.getElementById('edit-email').value = '';
+                document.getElementById('edit-email-enabled').checked = false;
+            }
+        }
+
+        async function saveUserEmailConfig(username, emailConfig) {
+            try {
+                const response = await fetch(`/api/admin/email-config/assistant/${username}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(emailConfig)
+                });
+                
+                if (!response.ok) throw new Error('Failed to save email config');
+                
+                showStatus(`Email configuration saved for ${username}`, 'success');
+                
+            } catch (error) {
+                showStatus('Error saving email config: ' + error.message, 'error');
+                throw error;
+            }
         }
 
         // Initialize

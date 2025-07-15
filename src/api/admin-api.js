@@ -385,6 +385,78 @@ export class AdminAPI {
             }
         });
 
+        // Email configuration endpoints
+        router.get('/email-config', async (req, res) => {
+            try {
+                const config = await this.loadConfig();
+                const emailConfig = config.email_configuration || {
+                    enabled: false,
+                    assistants: {}
+                };
+                
+                res.json(emailConfig);
+            } catch (error) {
+                res.status(500).json({ error: error.message });
+            }
+        });
+
+        router.put('/email-config', async (req, res) => {
+            try {
+                const config = await this.loadConfig();
+                
+                if (!config.email_configuration) {
+                    config.email_configuration = {
+                        enabled: false,
+                        assistants: {}
+                    };
+                }
+                
+                config.email_configuration = {
+                    ...config.email_configuration,
+                    ...req.body
+                };
+                
+                await this.saveConfig(config);
+                res.json({ success: true });
+                
+            } catch (error) {
+                res.status(500).json({ error: error.message });
+            }
+        });
+
+        router.put('/email-config/assistant/:username', async (req, res) => {
+            try {
+                const { username } = req.params;
+                const { email, enabled } = req.body;
+                
+                if (!email) {
+                    return res.status(400).json({ error: 'Email address is required' });
+                }
+                
+                const config = await this.loadConfig();
+                
+                if (!config.email_configuration) {
+                    config.email_configuration = { enabled: false, assistants: {} };
+                }
+                
+                if (!config.email_configuration.assistants) {
+                    config.email_configuration.assistants = {};
+                }
+                
+                config.email_configuration.assistants[username] = {
+                    email: email,
+                    enabled: enabled !== false,
+                    updated_at: new Date().toISOString()
+                };
+                
+                await this.saveConfig(config);
+                res.json({ success: true });
+                
+            } catch (error) {
+                res.status(500).json({ error: error.message });
+            }
+        });
+
         // Sync config to database
         router.post('/sync-to-database', async (req, res) => {
             try {
