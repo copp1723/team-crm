@@ -378,4 +378,22 @@ Format as professional executive briefing.`;
       ).length
     };
   }
+
+  getAgentStats() {
+    return {
+      pendingUpdates: 0,
+      totalSummariesGenerated: this.summaryHistory.length,
+      lastSummaryTime: this.summaryHistory[this.summaryHistory.length - 1]?.timestamp || null,
+      recentSummaries: this.summaryHistory.slice(-3)
+    };
+  }
+
+  async forceGenerateSummary() {
+    return {
+      status: 'no_updates',
+      message: 'No pending updates to summarize',
+      lastSummary: this.summaryHistory.length > 0 ?
+                        this.summaryHistory[this.summaryHistory.length - 1] : null
+    };
+  }
 }
