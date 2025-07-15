@@ -2,6 +2,7 @@ services:
   - type: web
     name: team-crm
     runtime: node
+    rootDir: .
     buildCommand: npm install
     startCommand: npm start
     envVars:
