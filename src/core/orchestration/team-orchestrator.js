@@ -11,7 +11,7 @@
  */
 
 import { EnhancedPersonalAssistant } from '../agents/enhanced-personal-assistant.js';
-import { MasterExecutiveAgent } from '../agents/simple-master-agent.js';
+import { MasterExecutiveAgent } from '../agents/master-executive-agent.js';
 import { EnhancedMemoryIntegration } from '../memory/enhanced-memory-integration.js';
 import { TeamNotificationSystem } from '../notifications/team-notification-system.js';
 import { ContextAwareAI } from '../../ai/context-aware-ai.js';
