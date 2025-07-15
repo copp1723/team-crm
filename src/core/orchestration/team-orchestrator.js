@@ -160,17 +160,17 @@ export class TeamOrchestrator extends EventEmitter {
             const { createConnection } = await import('../../utils/database-pool.js');
             const db = createConnection();
             
+            await db.connect();
+            
             const result = await db.query(`
                 SELECT 
-                    external_id,
+                    id as external_id,
                     name,
                     role,
                     focus_areas,
                     extraction_priorities,
-                    ai_model,
-                    active
+                    ai_model
                 FROM team_members 
-                WHERE active = true
                 ORDER BY name
             `);
             
