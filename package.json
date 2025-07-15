@@ -16,9 +16,16 @@
     "db:render": "node scripts/render-db-setup.js",
     "verify": "node scripts/verify-render-setup.js",
     "cleanup": "node scripts/cleanup.js",
+  "scripts": {
     "cleanup:maintenance": "node scripts/cleanup-maintenance.js",
-    "lint": "eslint ."
+    "lint": "ESLINT_USE_FLAT_CONFIG=false eslint ."
   },
+  "dependencies": {
+    "ws": "^8.14.2"
+  },
+  "devDependencies": {
+    "eslint": "^8.57.0"
+  }
   "keywords": [
     "ai",
     "crm",
