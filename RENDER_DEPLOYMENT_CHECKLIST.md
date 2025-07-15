@@ -15,9 +15,9 @@ To make the Team CRM work properly on Render, you need to set these environment 
 
 3. **Authentication Passwords**
    - JOE_PASSWORD
-   - CHARLIE_PASSWORD  
+   - CHARLIE_PASSWORD
    - TRE_PASSWORD
-   - JOSH_PASSWORD (missing from render.yaml - needs to be added!)
+   - JOSH_PASSWORD
 
 ### 🟡 Important but Optional
 4. **REDIS_URL** - For rate limiting and caching
@@ -112,29 +112,22 @@ curl -u tre:YOUR_TRE_PASSWORD \
 
 ## What's Currently Missing for Full Functionality
 
-1. **JOSH_PASSWORD** not in render.yaml - add this line:
-   ```yaml
-   - key: JOSH_PASSWORD
-     sync: false
-   ```
-
-2. **Database Migrations** - After DATABASE_URL is set, you need to run:
+1. **Database Migrations** - After DATABASE_URL is set, you need to run:
    ```bash
    npm run db:setup
    ```
 
-3. **Initial Data** - The system needs some initial clients/deals to work with
+2. **Initial Data** - The system needs some initial clients/deals to work with
 
-4. **WebSocket Configuration** - Render may need additional config for WebSockets
+3. **WebSocket Configuration** - Render may need additional config for WebSockets
 
-5. **Background Jobs** - Queue processing for AI tasks might need setup
+4. **Background Jobs** - Queue processing for AI tasks might need setup
 
 ## Next Steps
 
-1. Update render.yaml to include JOSH_PASSWORD
-2. Ensure all environment variables are set in Render dashboard
-3. Run database migrations after deployment
-4. Test the flow step by step
-5. Monitor logs for any errors
+1. Ensure all environment variables are set in Render dashboard
+2. Run database migrations after deployment
+3. Test the flow step by step
+4. Monitor logs for any errors
 
 Would you like me to update the render.yaml file and create a script to help verify all requirements are met?
