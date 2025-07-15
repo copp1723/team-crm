@@ -475,10 +475,8 @@
             </div>
 
             <!-- Team Member Selection -->
-            <div class="team-selection">
-                <button class="team-member-btn active" data-member="joe">Joe</button>
-                <button class="team-member-btn" data-member="charlie">Charlie</button>
-                <button class="team-member-btn" data-member="tre">Tre</button>
+            <div class="team-selection" id="team-selection">
+                <!-- Team members will be loaded dynamically -->
             </div>
 
             <!-- Transcript Area -->
@@ -774,10 +772,75 @@
             }
         });
 
-        document.querySelectorAll('.team-member-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                selectTeamMember(btn.dataset.member);
+        // Load team members dynamically
+        async function loadTeamMembers() {
+            try {
+                const response = await fetch('/api/team');
+                if (response.ok) {
+                    const members = await response.json();
+                    const teamSelection = document.getElementById('team-selection');
+                    
+                    if (members && members.length > 0) {
+                        members.forEach((member, index) => {
+                            const button = document.createElement('button');
+                            button.className = `team-member-btn ${index === 0 ? 'active' : ''}`;
+                            button.dataset.member = member.id || member.key;
+                            button.textContent = member.name;
+                            teamSelection.appendChild(button);
+                        });
+                        
+                        // Set first member as current
+                        if (members[0]) {
+                            currentMember = members[0].id || members[0].key;
+                        }
+                        
+                        // Add event listeners to new buttons
+                        setupTeamMemberButtons();
+                    } else {
+                        // Fallback to hardcoded team members
+                        teamSelection.innerHTML = `
+                            <button class="team-member-btn active" data-member="joe">Joe</button>
+                            <button class="team-member-btn" data-member="charlie">Charlie</button>
+                            <button class="team-member-btn" data-member="tre">Tre</button>
+                        `;
+                        setupTeamMemberButtons();
+                    }
+                } else {
+                    console.error('Failed to load team members');
+                    // Fallback to hardcoded team members
+                    const teamSelection = document.getElementById('team-selection');
+                    teamSelection.innerHTML = `
+                        <button class="team-member-btn active" data-member="joe">Joe</button>
+                        <button class="team-member-btn" data-member="charlie">Charlie</button>
+                        <button class="team-member-btn" data-member="tre">Tre</button>
+                    `;
+                    setupTeamMemberButtons();
+                }
+            } catch (error) {
+                console.error('Error loading team members:', error);
+                // Fallback to hardcoded team members
+                const teamSelection = document.getElementById('team-selection');
+                teamSelection.innerHTML = `
+                    <button class="team-member-btn active" data-member="joe">Joe</button>
+                    <button class="team-member-btn" data-member="charlie">Charlie</button>
+                    <button class="team-member-btn" data-member="tre">Tre</button>
+                `;
+                setupTeamMemberButtons();
+            }
+        }
+
+        // Setup team member button event listeners
+        function setupTeamMemberButtons() {
+            document.querySelectorAll('.team-member-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    selectTeamMember(btn.dataset.member);
+                });
             });
+        }
+
+        // Load team members on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadTeamMembers();
         });
 
         // Global function for voice commands
