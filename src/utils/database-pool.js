@@ -389,3 +389,11 @@ export class DatabasePool {
         }
     }
 }
+
+// Legacy compatibility function for admin-api.js
+export function createConnection() {
+    return new pg.Client({
+        connectionString: process.env.DATABASE_URL,
+        ssl: { rejectUnauthorized: false }
+    });
+}
