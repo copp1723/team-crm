@@ -3,7 +3,8 @@
  * Provides intelligent, memory-backed AI responses with context awareness
  */
 
-import { MemoryEngine } from './memory-engine.js';
+import { EnhancedMemoryIntegration } from '../core/memory/enhanced-memory-integration.js';
+import { ProactiveConversationalAI } from './proactive-conversational-ai.js';
 import { logger } from '../utils/logger.js';
 
 export class ContextAwareAI {
@@ -28,7 +29,16 @@ export class ContextAwareAI {
             ...config
         };
         
-        this.memoryEngine = new MemoryEngine(config.memory || {});
+        // Initialize Supermemory-based systems
+        this.memoryEngine = new EnhancedMemoryIntegration({
+            apiKey: this.config.openRouterApiKey,
+            collection: 'context-aware-ai-main',
+            baseUrl: process.env.SUPERMEMORY_BASE_URL || 'https://api.supermemory.ai'
+        });
+        
+        // Initialize proactive conversational AI
+        this.proactiveAI = new ProactiveConversationalAI(this.config);
+        
         this.logger = logger.child({ component: 'ContextAwareAI' });
         
         // AI models configuration
@@ -58,13 +68,14 @@ export class ContextAwareAI {
      */
     async initialize() {
         try {
-            await this.memoryEngine.initialize();
-            
+            // Initialize Supermemory integration
             if (this.memoryEngine.enabled) {
-                this.logger.info('Context-Aware AI system initialized successfully with memory');
+                this.logger.info('Context-Aware AI system initialized successfully with Supermemory');
             } else {
-                this.logger.info('Context-Aware AI system initialized without memory (Redis not available)');
+                this.logger.info('Context-Aware AI system initialized without memory (Supermemory not available)');
             }
+            
+            this.logger.info('Context-Aware AI system with proactive capabilities initialized');
         } catch (error) {
             this.logger.error('Failed to initialize Context-Aware AI', { error });
             // Don't throw - allow app to continue
@@ -180,7 +191,7 @@ export class ContextAwareAI {
     }
     
     /**
-     * Get relevant context from memory engine
+     * Get relevant context from Supermemory
      */
     async getRelevantContext(message, context) {
         try {
@@ -191,33 +202,59 @@ export class ContextAwareAI {
                 teamHistory: [],
                 executiveDecisions: [],
                 patterns: {},
-                relationships: []
+                relationships: [],
+                proactiveSuggestions: []
             };
             
-            // Get conversation history
+            if (!this.memoryEngine.enabled) {
+                return relevantContext;
+            }
+            
+            // Get conversation history from Supermemory
             if (memberName) {
-                relevantContext.conversation = await this.memoryEngine.getConversationContext(
-                    memberName, 
-                    this.config.memoryContextWindow
-                );
+                const conversationMemories = await this.memoryEngine.searchRelevantMemories(message, {
+                    filters: {
+                        userId: memberName,
+                        types: ['conversation'],
+                        limit: this.config.memoryContextWindow
+                    }
+                });
+                relevantContext.conversation = conversationMemories;
             }
             
             // Get team patterns and history
             if (this.config.enableTeamIntelligence) {
-                relevantContext.teamHistory = await this.memoryEngine.getTeamPatterns(memberName);
-                relevantContext.patterns = this.analyzeTeamPatterns(relevantContext.teamHistory);
+                const teamMemories = await this.memoryEngine.searchRelevantMemories('', {
+                    filters: {
+                        types: ['team_update', 'team_activity'],
+                        limit: 15,
+                        timeRange: '7d'
+                    }
+                });
+                relevantContext.teamHistory = teamMemories;
+                relevantContext.patterns = this.analyzeTeamPatterns(teamMemories);
             }
             
             // Get executive context if needed
             if (context.isExecutive || this.requiresExecutiveContext(message)) {
-                relevantContext.executiveDecisions = await this.memoryEngine.getContextualMemories(
-                    message,
-                    {
-                        type: 'executive',
+                const executiveMemories = await this.memoryEngine.searchRelevantMemories(message, {
+                    filters: {
+                        types: ['executive', 'escalation'],
                         limit: 5,
                         importance: 'high'
                     }
-                );
+                });
+                relevantContext.executiveDecisions = executiveMemories;
+            }
+            
+            // Get proactive suggestions using the new system
+            if (this.proactiveAI && memberName) {
+                try {
+                    await this.proactiveAI.initializeUserMemory(memberName, memberName);
+                    relevantContext.proactiveSuggestions = await this.proactiveAI.generateProactiveSuggestions(memberName, context);
+                } catch (error) {
+                    this.logger.warn('Failed to get proactive suggestions', { error });
+                }
             }
             
             // Get relationship context
@@ -227,7 +264,7 @@ export class ContextAwareAI {
             
         } catch (error) {
             this.logger.warn('Failed to get relevant context', { error });
-            return { conversation: [], teamHistory: [], executiveDecisions: [], patterns: {}, relationships: [] };
+            return { conversation: [], teamHistory: [], executiveDecisions: [], patterns: {}, relationships: [], proactiveSuggestions: [] };
         }
     }
     

@@ -21,6 +21,7 @@ import { TeamOrchestrator } from './core/orchestration/team-orchestrator.js';
 import { ExecutiveIntelligenceAPI } from './api/executive-intelligence-api.js';
 import { AdminAPI } from './api/admin-api.js';
 import { CalendarAPI } from './api/calendar-api.js';
+import { ProactiveConversationAPI } from './api/proactive-conversation-api.js';
 import { EnhancedAPIResponse } from './api/enhanced-api-response.js';
 import { ValidationMiddleware } from './middleware/validation.js';
 import { registerMemoryStatsAPI } from './api/memory-stats-api.js';
@@ -49,6 +50,7 @@ export class TeamCRMServer {
         this.executiveAPI = null;
         this.adminAPI = null;
         this.calendarAPI = null;
+        this.proactiveConversationAPI = null;
         this.rateLimiter = null;
         this.activityLogger = null;
         this.realtimeManager = null;
@@ -132,6 +134,16 @@ export class TeamCRMServer {
             // Initialize calendar API
             this.calendarAPI = new CalendarAPI(this.orchestrator);
             this.calendarAPI.registerEndpoints(this.app);
+            
+            // Initialize proactive conversation API
+            this.proactiveConversationAPI = new ProactiveConversationAPI({
+                openRouterApiKey: this.config.openrouter?.apiKey || process.env.OPENROUTER_API_KEY,
+                sessionTimeout: 1800000, // 30 minutes
+                enableProactiveSuggestions: true,
+                enableSmartAutocomplete: true,
+                enableContextualPrompts: true
+            });
+            this.proactiveConversationAPI.setupRoutes(this.app);
             
             // Initialize memory stats API
             registerMemoryStatsAPI(this.app, this.orchestrator);

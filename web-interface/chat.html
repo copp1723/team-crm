@@ -106,6 +106,108 @@
             border-color: #999999;
         }
 
+        /* Proactive Suggestions */
+        .proactive-suggestions {
+            background: #f8f8f8;
+            border: 1px solid #e0e0e0;
+            padding: 24px;
+            margin-bottom: 24px;
+            border-left: 4px solid #000000;
+        }
+
+        .suggestions-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .suggestions-header h3 {
+            font-size: 14px;
+            font-weight: 600;
+            color: #000000;
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .refresh-btn {
+            background: none;
+            border: 1px solid #ddd;
+            color: #666;
+            padding: 4px 8px;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .refresh-btn:hover {
+            background: #000000;
+            color: #ffffff;
+            border-color: #000000;
+        }
+
+        .suggestions-content {
+            display: grid;
+            gap: 12px;
+        }
+
+        .suggestion-item {
+            background: #ffffff;
+            padding: 12px 16px;
+            border: 1px solid #e0e0e0;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .suggestion-item:hover {
+            border-color: #000000;
+            background: #f9f9f9;
+        }
+
+        .suggestion-item.priority-high {
+            border-left: 4px solid #ff4444;
+        }
+
+        .suggestion-item.priority-medium {
+            border-left: 4px solid #ffaa00;
+        }
+
+        .suggestion-item.priority-low {
+            border-left: 4px solid #00aa00;
+        }
+
+        .suggestion-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #000000;
+            margin-bottom: 4px;
+        }
+
+        .suggestion-prompt {
+            font-size: 12px;
+            color: #333333;
+            margin-bottom: 6px;
+        }
+
+        .suggestion-context {
+            font-size: 11px;
+            color: #666666;
+            font-style: italic;
+        }
+
+        .suggestion-type {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            font-size: 10px;
+            color: #999999;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
         /* Memory Query */
         .memory-section {
             background: #f8f8f8;
@@ -497,6 +599,17 @@
                 <!-- Team members will be loaded dynamically -->
             </div>
 
+            <!-- Proactive Suggestions Panel -->
+            <div class="proactive-suggestions" id="proactive-suggestions">
+                <div class="suggestions-header">
+                    <h3>Smart Suggestions</h3>
+                    <button class="refresh-btn" id="refresh-suggestions">⟳</button>
+                </div>
+                <div class="suggestions-content" id="suggestions-content">
+                    <!-- Suggestions will be loaded dynamically -->
+                </div>
+            </div>
+
             <!-- Memory Query -->
             <div class="memory-section">
                 <form class="memory-form" id="memory-form">
@@ -589,6 +702,11 @@
     <script>
         // Current user
         let currentUser = 'joe';
+        
+        // Proactive suggestions system
+        let proactiveSuggestions = [];
+        let suggestionRefreshInterval = 5 * 60 * 1000; // 5 minutes
+        let lastSuggestionRefresh = 0;
 
         // User selection is now handled by setupUserButtons() after dynamic loading
 
@@ -975,6 +1093,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             loadTeamMembers();
             initializeWebSocket();
+            initializeProactiveSuggestions();
             
             // Initialize voice input button
             initializeVoiceInput();
@@ -1000,6 +1119,105 @@
                 });
             } catch (error) {
                 console.log('Voice input not available:', error);
+            }
+        }
+
+        // Proactive Suggestions Functions
+        function initializeProactiveSuggestions() {
+            // Load initial suggestions
+            loadProactiveSuggestions();
+            
+            // Setup refresh button
+            document.getElementById('refresh-suggestions').addEventListener('click', function() {
+                loadProactiveSuggestions(true);
+            });
+            
+            // Auto-refresh suggestions every 5 minutes
+            setInterval(() => {
+                loadProactiveSuggestions();
+            }, suggestionRefreshInterval);
+        }
+
+        async function loadProactiveSuggestions(forceRefresh = false) {
+            try {
+                const now = Date.now();
+                
+                // Check if we need to refresh
+                if (!forceRefresh && now - lastSuggestionRefresh < suggestionRefreshInterval) {
+                    return;
+                }
+                
+                const response = await fetch(`/api/conversation/suggestions/${currentUser}?memberName=${currentUser}`);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success) {
+                        proactiveSuggestions = data.data.suggestions;
+                        lastSuggestionRefresh = now;
+                        renderSuggestions();
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to load proactive suggestions:', error);
+            }
+        }
+
+        function renderSuggestions() {
+            const suggestionsContainer = document.getElementById('suggestions-content');
+            
+            if (!proactiveSuggestions || proactiveSuggestions.length === 0) {
+                suggestionsContainer.innerHTML = '<div style="color: #666; font-style: italic;">No suggestions available</div>';
+                return;
+            }
+            
+            suggestionsContainer.innerHTML = proactiveSuggestions.map(suggestion => `
+                <div class="suggestion-item priority-${suggestion.priority}" 
+                     onclick="applySuggestion('${suggestion.prompt}', '${suggestion.type}')">
+                    <div class="suggestion-type">${suggestion.type.replace('_', ' ')}</div>
+                    <div class="suggestion-title">${suggestion.title}</div>
+                    <div class="suggestion-prompt">${suggestion.prompt}</div>
+                    <div class="suggestion-context">${suggestion.context}</div>
+                </div>
+            `).join('');
+        }
+
+        function applySuggestion(prompt, type) {
+            const textarea = document.getElementById('update-text');
+            
+            // If textarea is empty, use the full prompt
+            if (!textarea.value.trim()) {
+                textarea.value = prompt;
+            } else {
+                // Append the prompt
+                textarea.value += '\n\n' + prompt;
+            }
+            
+            // Focus on textarea and trigger input event
+            textarea.focus();
+            textarea.dispatchEvent(new Event('input'));
+            
+            // Store conversation for learning
+            storeConversationForLearning(prompt, '', { type: 'suggestion_applied', suggestionType: type });
+        }
+
+        async function storeConversationForLearning(message, response, metadata = {}) {
+            try {
+                await fetch('/api/conversation/store', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        userId: currentUser,
+                        message,
+                        response,
+                        metadata: {
+                            ...metadata,
+                            memberName: currentUser,
+                            timestamp: new Date().toISOString()
+                        }
+                    })
+                });
+            } catch (error) {
+                console.error('Failed to store conversation:', error);
             }
         }
     </script>
