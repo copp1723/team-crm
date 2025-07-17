@@ -66,6 +66,32 @@ export class TeamCRMServer {
     }
     
     /**
+     * Initialize database connection
+     */
+    async initializeDatabase() {
+        try {
+            // Check if database configuration exists
+            if (!process.env.DB_HOST && !process.env.DATABASE_URL) {
+                logger.info('📝 Database disabled - using Supermemory + JSON config only');
+                logger.info('✅ Running in database-free mode');
+                return;
+            }
+            logger.info('Initializing database connection...');
+            // Import and initialize database connection
+            const { db } = await import('./core/database/connection.js');
+            await db.initialize();
+            logger.info('✅ Database connection established');
+            // Store reference for shutdown
+            this.database = db;
+        } catch (error) {
+            logger.error('❌ Database initialization failed:', error.message);
+            logger.warn('⚠️  Continuing without database - some features will be disabled');
+            // Don't throw error - allow server to start without database
+            // This prevents the UserActivityTracker errors from crashing the server
+        }
+    }
+    
+    /**
      * Initialize and start the server
      */
     async start() {
@@ -107,9 +133,12 @@ export class TeamCRMServer {
                 maxMessagesPerWindow: 100
             });
             
-            // Initialize the orchestrator
-            this.orchestrator = new TeamOrchestrator(this.config);
-            await this.orchestrator.initialize();
+            // Initialize database first
+            await this.initializeDatabase();
+            
+        // Initialize the orchestrator
+        this.orchestrator = new TeamOrchestrator(this.config);
+        await this.orchestrator.initialize();
             
             // Initialize team collaboration system
             this.teamCollaboration = new TeamCollaboration(
@@ -128,7 +157,7 @@ export class TeamCRMServer {
             this.executiveAPI.registerEndpoints(this.app);
             
             // Initialize admin API
-            this.adminAPI = new AdminAPI();
+            this.adminAPI = new AdminAPI(undefined, this.orchestrator);
             this.adminAPI.registerEndpoints(this.app);
             
             // Initialize calendar API
@@ -1188,12 +1217,12 @@ export class TeamCRMServer {
             div.className = 'update-item';
             
             if (message.type === 'updateProcessed') {
-                div.innerHTML = \`<strong>\${message.data.memberName}</strong> submitted an update - \${message.data.extractedItems} items extracted\`;
+                div.innerHTML = `<strong>${message.data.memberName}</strong> submitted an update - ${message.data.extractedItems} items extracted`;
             } else if (message.type === 'summaryGenerated') {
-                div.innerHTML = \`<strong>Executive Summary Generated</strong> - \${message.data.processedUpdates} updates processed\`;
+                div.innerHTML = `<strong>Executive Summary Generated</strong> - ${message.data.processedUpdates} updates processed`;
                 div.style.borderLeftColor = '#28a745';
             } else if (message.type === 'connected') {
-                div.innerHTML = \`Connected: \${message.message}\`;
+                div.innerHTML = `Connected: ${message.message}`;
                 div.style.borderLeftColor = '#28a745';
             }
             
@@ -1228,15 +1257,16 @@ export class TeamCRMServer {
      */
     async shutdown() {
         console.log('Shutting down Team CRM Server...');
-        
         if (this.teamCollaboration) {
             await this.teamCollaboration.shutdown();
         }
-        
         if (this.orchestrator) {
             await this.orchestrator.shutdown();
         }
-        
+        // Close database connection
+        if (this.database) {
+            await this.database.close();
+        }
         this.server.close();
         console.log('Team CRM Server shutdown complete');
     }

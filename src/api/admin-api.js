@@ -15,9 +15,10 @@ const __dirname = path.dirname(__filename);
 const upload = multer({ dest: '/tmp' });
 
 export class AdminAPI {
-    constructor(configPath) {
+    constructor(configPath, orchestrator) {
         this.configPath = configPath || path.join(__dirname, '../../config/team-config.json');
         this.authPath = path.join(__dirname, '../middleware/auth.js');
+        this.orchestrator = orchestrator;
     }
 
     /**
@@ -107,10 +108,18 @@ export class AdminAPI {
                 await this.saveConfig(config);
                 await this.updateAuthFile(config.team.members);
 
+                // Reload orchestrator team members if available
+                let reloadStatus = false;
+                if (this.orchestrator && typeof this.orchestrator.reloadTeamMembers === 'function') {
+                    await this.orchestrator.reloadTeamMembers();
+                    reloadStatus = true;
+                }
+
                 res.json({ 
                     success: true, 
                     password: password,
-                    envVar: `${username.toUpperCase()}_PASSWORD=${password}`
+                    envVar: `${username.toUpperCase()}_PASSWORD=${password}`,
+                    assistantsReloaded: reloadStatus
                 });
 
             } catch (error) {
@@ -167,6 +176,11 @@ export class AdminAPI {
 
                 await this.saveConfig(config);
 
+                // Reload orchestrator team members if available
+                if (this.orchestrator && typeof this.orchestrator.reloadTeamMembers === 'function') {
+                    await this.orchestrator.reloadTeamMembers();
+                }
+
                 res.json({ success: true });
 
             } catch (error) {
@@ -193,7 +207,14 @@ export class AdminAPI {
                 await this.saveConfig(config);
                 await this.updateAuthFile(config.team.members);
 
-                res.json({ success: true });
+                // Reload orchestrator team members if available
+                let reloadStatus = false;
+                if (this.orchestrator && typeof this.orchestrator.reloadTeamMembers === 'function') {
+                    await this.orchestrator.reloadTeamMembers();
+                    reloadStatus = true;
+                }
+
+                res.json({ success: true, assistantsReloaded: reloadStatus });
 
             } catch (error) {
                 res.status(500).json({ error: error.message });
@@ -252,12 +273,34 @@ export class AdminAPI {
                 // Clean up uploaded file
                 await fs.unlink(req.file.path);
 
+                // Reload orchestrator team members if available
+                let reloadStatus = false;
+                if (this.orchestrator && typeof this.orchestrator.reloadTeamMembers === 'function') {
+                    await this.orchestrator.reloadTeamMembers();
+                    reloadStatus = true;
+                }
+
                 res.json({ 
                     success: true, 
                     imported: imported,
-                    passwords: passwords 
+                    passwords: passwords,
+                    assistantsReloaded: reloadStatus
                 });
 
+            } catch (error) {
+                res.status(500).json({ error: error.message });
+            }
+        });
+
+        // Manual reload endpoint for orchestrator team members
+        router.post('/reload-team-members', async (req, res) => {
+            try {
+                let reloadStatus = false;
+                if (this.orchestrator && typeof this.orchestrator.reloadTeamMembers === 'function') {
+                    await this.orchestrator.reloadTeamMembers();
+                    reloadStatus = true;
+                }
+                res.json({ success: reloadStatus });
             } catch (error) {
                 res.status(500).json({ error: error.message });
             }

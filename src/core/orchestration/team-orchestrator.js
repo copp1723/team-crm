@@ -108,14 +108,10 @@ export class TeamOrchestrator extends EventEmitter {
      */
     async initializePersonalAssistants() {
         let members;
-        
-        try {
-            // Try to load team members from database first
-            members = await this.loadTeamMembersFromDatabase();
-            logger.info(`Loaded ${members.length} team members from database`);
-        } catch (error) {
-            logger.warn('Failed to load team members from database, falling back to config file', { error: error.message });
-            // Fall back to config file
+        // Check if database is disabled (database-free mode)
+        if (!process.env.DB_HOST && !process.env.DATABASE_URL) {
+            logger.info('Database-free mode: Loading team members from config file only');
+            // Use config file directly
             members = Object.entries(this.config.team.members).map(([key, config]) => ({
                 external_id: key,
                 name: config.name,
@@ -124,12 +120,27 @@ export class TeamOrchestrator extends EventEmitter {
                 extraction_priorities: config.extraction_priorities,
                 ai_model: config.ai_model
             }));
+        } else {
+            try {
+                // Try to load team members from database first
+                members = await this.loadTeamMembersFromDatabase();
+                logger.info(`Loaded ${members.length} team members from database`);
+            } catch (error) {
+                logger.warn('Failed to load team members from database, falling back to config file', { error: error.message });
+                // Fall back to config file
+                members = Object.entries(this.config.team.members).map(([key, config]) => ({
+                    external_id: key,
+                    name: config.name,
+                    role: config.role,
+                    focus_areas: config.focus_areas,
+                    extraction_priorities: config.extraction_priorities,
+                    ai_model: config.ai_model
+                }));
+            }
         }
-        
         for (const member of members) {
             try {
                 logger.info(`Initializing personal assistant for ${member.name}...`);
-                
                 // Create memberConfig in the expected format
                 const memberConfig = {
                     id: member.external_id,
@@ -139,12 +150,9 @@ export class TeamOrchestrator extends EventEmitter {
                     extraction_priorities: member.extraction_priorities || ["dealer_feedback", "meeting_notes", "action_items"],
                     ai_model: member.ai_model || "claude-3-sonnet"
                 };
-                
                 const assistant = new EnhancedPersonalAssistant(memberConfig, this.config, this.memorySystem);
                 this.personalAssistants.set(member.external_id, assistant);
-                
                 logger.info(`✅ Personal assistant ready for ${member.name}`);
-                
             } catch (error) {
                 logger.error(`Error initializing assistant for ${member.name}`, { error });
                 throw error;
@@ -734,6 +742,16 @@ export class TeamOrchestrator extends EventEmitter {
             });
         }
         return members;
+    }
+    
+    /**
+     * Reload team members from config/database and re-initialize personal assistants
+     */
+    async reloadTeamMembers() {
+        logger.info('Reloading team members in orchestrator...');
+        await this.initializePersonalAssistants();
+        this.stats.activeMembers = this.personalAssistants.size;
+        logger.info(`Reloaded ${this.personalAssistants.size} team members.`);
     }
     
     /**
