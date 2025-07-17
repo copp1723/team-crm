@@ -18,7 +18,9 @@
     "cleanup": "node scripts/cleanup.js",
     "cleanup:maintenance": "node scripts/cleanup-maintenance.js",
     "lint": "ESLINT_USE_FLAT_CONFIG=false eslint .",
-    "diagnose": "node scripts/diagnostic-suite.js"
+    "diagnose": "node scripts/diagnostic-suite.js",
+    "fix-config": "node scripts/fix-configuration-issues.js",
+    "setup-render": "node scripts/setup-render-environment.js"
   },
   "devDependencies": {
     "eslint": "^8.57.1"

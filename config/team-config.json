@@ -19,7 +19,7 @@
           "upsell_opportunities"
         ],
         "ai_model": "claude-3-sonnet",
-        "supermemory_key": null
+        "supermemory_key": "sm_dy7m3s5FbqC2DaFMkKoTw1_eqeTRieoUiiNSbdebASrJOLytIDibiINzceXWkPkMzNTiNpQzIYbgadhSKnHTyty"
       },
       "charlie": {
         "id": "charlie",
@@ -54,7 +54,7 @@
           "action_items"
         ],
         "ai_model": "claude-3-sonnet",
-        "supermemory_key": null
+        "supermemory_key": "sm_dy7m3s5FbqC2DaFMkKoTw1_BuDUfYMUxhFsVTXOAGylAWPDEIHEjBZCtXLjeYCjSHtPigMKaiRFfSBypZSpQiki"
       },
       "josh": {
         "id": "josh",
@@ -70,193 +70,113 @@
           "action_items"
         ],
         "ai_model": "claude-3-sonnet",
-        "supermemory_key": null
+        "supermemory_key": "sm_dy7m3s5FbqC2DaFMkKoTw1_ubkCkKKNiUJYISeeAzAWxCQnkwwcmNdXSOQPVjcLLUxIjDYVZfBFVTGqiAMNTsJq"
       },
       "kyle": {
         "id": "kyle",
         "name": "Kyle Olinger",
-        "role": "Operations",
+        "role": "VP Sales",
         "focus_areas": [
-          "operational_efficiency",
-          "process_optimization",
-          "system_management"
+          "dealer_relationships",
+          "sales_activities"
         ],
         "extraction_priorities": [
-          "operational_issues",
-          "process_improvements",
-          "system_updates"
+          "dealer_feedback",
+          "meeting_notes",
+          "action_items"
         ],
         "ai_model": "claude-3-sonnet",
-        "supermemory_key": null
+        "supermemory_key": "sm_dy7m3s5FbqC2DaFMkKoTw1_TVJLoCJmFTPcMWGzsjkcmQFCqUPiWjvmMlJIbfCewaQHReUcuQwcxWNCzUvmaOcG"
       },
       "amanda": {
         "id": "amanda",
         "name": "Amanda",
-        "role": "Operations",
+        "role": "Marketing",
         "focus_areas": [
-          "operational_support",
-          "workflow_management",
-          "quality_assurance"
+          "marketing_activities",
+          "campaign_management"
         ],
         "extraction_priorities": [
-          "operational_updates",
-          "workflow_issues",
-          "quality_metrics"
+          "campaign_results",
+          "marketing_insights",
+          "lead_generation"
         ],
         "ai_model": "claude-3-sonnet",
-        "supermemory_key": null
+        "supermemory_key": "sm_dy7m3s5FbqC2DaFMkKoTw1_GPmSAYgDtFWriEnwfndnmAXGJnkvrfUTHrnbOHTavUYRsZgbAblisfikmUAwrjhs"
       }
     },
-    "executives": [
-      {
-        "id": "tre",
-        "name": "Tre",
-        "role": "Founder & CEO",
-        "summary_style": "strategic_focus",
-        "priority_areas": [
-          "dealer_growth",
-          "product_adoption",
-          "market_penetration",
-          "team_velocity"
-        ],
-        "ai_model": "claude-3-opus"
-      },
-      {
-        "id": "josh",
-        "name": "Josh (Super Admin)",
-        "role": "System Administrator",
-        "summary_style": "strategic_focus",
-        "priority_areas": [
-          "team_performance",
-          "deal_pipeline",
-          "strategic_decisions"
-        ],
-        "ai_model": "claude-3-opus"
+    "executive": {
+      "name": "Tre",
+      "role": "Executive",
+      "description": "Receives strategic summaries",
+      "summaryStyle": "executive",
+      "focusAreas": [
+        "strategic decisions",
+        "attention allocation"
+      ],
+      "summaryPrompts": {
+        "attention": "Where does attention need to be focused?",
+        "revenue": "What has revenue impact?",
+        "urgent": "What requires immediate decision?"
       }
-    ]
-  },
-  "ai_configuration": {
-    "models": {
-      "extraction": "claude-3-sonnet",
-      "analysis": "gpt-4-turbo",
-      "summary": "claude-3-opus"
-    },
-    "processing": {
-      "batch_interval": 300,
-      "memory_retention_days": 30,
-      "priority_threshold": 0.7
     }
   },
-  "business_rules": {
-    "high_priority_keywords": [
-      "urgent",
-      "critical",
-      "deadline",
-      "dealer",
-      "dealership",
-      "pilot",
-      "churn"
-    ],
-    "executive_alert_conditions": [
-      "high_priority",
-      "dealer_at_risk",
-      "pilot_decision",
-      "competitor_threat"
-    ],
-    "keyword_filtering": {
-      "enabled": true,
-      "keywords": {
-        "critical": {
-          "priority_boost": 25,
-          "terms": [
-            "urgent",
-            "critical",
-            "emergency",
-            "down",
-            "outage",
-            "blocker",
-            "stopped",
-            "broken",
-            "failed",
-            "crisis"
-          ]
-        },
-        "high": {
-          "priority_boost": 15,
-          "terms": [
-            "dealer",
-            "dealership",
-            "pilot",
-            "churn",
-            "competitor",
-            "at risk",
-            "losing",
-            "escalation",
-            "complaint",
-            "angry",
-            "frustrated",
-            "cancel",
-            "cancellation"
-          ]
-        },
-        "medium": {
-          "priority_boost": 8,
-          "terms": [
-            "meeting",
-            "demo",
-            "integration",
-            "training",
-            "go-live",
-            "deployment",
-            "implementation",
-            "timeline",
-            "schedule",
-            "deadline",
-            "milestone"
-          ]
-        },
-        "low": {
-          "priority_boost": 3,
-          "terms": [
-            "update",
-            "status",
-            "progress",
-            "check-in",
-            "routine",
-            "weekly",
-            "monthly",
-            "report"
-          ]
-        }
-      },
-      "executive_escalation_threshold": 20,
-      "case_sensitive": false,
-      "match_whole_words": false
-    },
-    "auto_categorization": {
-      "dealer_updates": [
-        "dealer",
-        "dealership",
-        "GM",
-        "general manager",
-        "owner",
-        "meeting",
-        "demo"
-      ],
-      "implementation_status": [
-        "integration",
-        "training",
-        "go-live",
-        "deployment",
-        "API"
-      ],
-      "expansion_opportunities": [
-        "multi-rooftop",
-        "sister store",
-        "dealer group",
-        "upsell",
-        "add-on"
+  "ai": {
+    "provider": "openrouter",
+    "baseUrl": "https://openrouter.ai/api/v1",
+    "timeout": 30000,
+    "models": {
+      "extraction": "anthropic/claude-3-sonnet-20240229",
+      "analysis": "openai/gpt-4-turbo-preview",
+      "summary": "anthropic/claude-3-opus-20240229"
+    }
+  },
+  "memory": {
+    "enabled": true,
+    "settings": {
+      "baseUrl": "https://api.supermemory.ai",
+      "timeout": 30000,
+      "defaultCollection": "team-crm-main"
+    }
+  },
+  "calendar": {
+    "enabled": false,
+    "provider": "google",
+    "settings": {
+      "clientId": null,
+      "clientSecret": null,
+      "redirectUri": null,
+      "serviceAccountEmail": null,
+      "privateKey": null,
+      "scopes": [
+        "https://www.googleapis.com/auth/calendar",
+        "https://www.googleapis.com/auth/calendar.events"
       ]
+    }
+  },
+  "interface": {
+    "webInterface": {
+      "enabled": true,
+      "port": 10000,
+      "host": "0.0.0.0"
+    }
+  },
+  "environments": {
+    "production": {
+      "interface": {
+        "webInterface": {
+          "port": 10000,
+          "host": "0.0.0.0"
+        }
+      }
+    },
+    "development": {
+      "interface": {
+        "webInterface": {
+          "port": 8080,
+          "host": "localhost"
+        }
+      }
     }
   }
 }

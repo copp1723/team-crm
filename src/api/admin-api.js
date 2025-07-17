@@ -40,7 +40,7 @@ export class AdminAPI {
                 Object.entries(config.team.members).forEach(([username, member]) => {
                     users[username] = {
                         ...member,
-                        isExecutive: config.team.executives.some(e => e.id === username)
+                        isExecutive: config.team.executives?.some(e => e.id === username) || false
                     };
                 });
 
