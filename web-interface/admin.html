@@ -536,7 +536,7 @@
                         </div>
                     </div>
                     <div class="form-actions">
-                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                        <button type="submit" class="btn btn-primary" onclick="console.log('Save button clicked directly!')">Save Changes</button>
                         <button type="button" class="btn btn-secondary" onclick="cancelEdit()">Cancel</button>
                         <button type="button" class="btn btn-danger" onclick="deleteUser()">Delete User</button>
                     </div>
@@ -938,8 +938,23 @@
         // Edit user form submission
         document.getElementById('user-edit-form').addEventListener('submit', async (e) => {
             e.preventDefault();
+            console.log('Save button clicked!'); // Debug log
             
-            if (!currentEditUser) return;
+            // Check form validation
+            const form = e.target;
+            console.log('Form valid:', form.checkValidity()); // Debug log
+            if (!form.checkValidity()) {
+                console.log('Form validation failed!'); // Debug log
+                form.reportValidity();
+                return;
+            }
+            
+            if (!currentEditUser) {
+                console.log('No current edit user!'); // Debug log
+                return;
+            }
+            
+            console.log('Processing save for user:', currentEditUser); // Debug log
             
             const userData = {
                 name: document.getElementById('edit-name').value,
@@ -948,6 +963,8 @@
                 isExecutive: document.getElementById('edit-executive').checked
             };
             
+            console.log('User data to save:', userData); // Debug log
+            
             // Save email configuration separately
             const emailConfig = {
                 email: document.getElementById('edit-email').value,
@@ -955,6 +972,7 @@
             };
             
             if (emailConfig.email) {
+                console.log('Saving email config:', emailConfig); // Debug log
                 await saveUserEmailConfig(currentEditUser, emailConfig);
             }
             
@@ -965,23 +983,35 @@
             };
             
             if (supermemoryConfig.apiKey) {
+                console.log('Saving supermemory config:', supermemoryConfig); // Debug log
                 await saveUserSupermemoryConfig(currentEditUser, supermemoryConfig);
             }
             
             try {
+                console.log('Making API request to update user...'); // Debug log
                 const response = await fetch(`/api/admin/users/${currentEditUser}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(userData)
                 });
                 
-                if (!response.ok) throw new Error('Failed to update user');
+                console.log('API response status:', response.status); // Debug log
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.log('API error response:', errorText); // Debug log
+                    throw new Error('Failed to update user: ' + errorText);
+                }
+                
+                const result = await response.json();
+                console.log('API success response:', result); // Debug log
                 
                 showStatus('User updated successfully!', 'success');
                 await loadUsers();
                 cancelEdit();
                 
             } catch (error) {
+                console.error('Error in save:', error); // Debug log
                 showStatus('Error updating user: ' + error.message, 'error');
             }
         });
