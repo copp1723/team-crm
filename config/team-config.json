@@ -19,7 +19,8 @@
           "upsell_opportunities"
         ],
         "ai_model": "claude-3-sonnet",
-        "supermemory_key": "sm_dy7m3s5FbqC2DaFMkKoTw1_eqeTRieoUiiNSbdebASrJOLytIDibiINzceXWkPkMzNTiNpQzIYbgadhSKnHTyty"
+        "supermemory_key": "sm_dy7m3s5FbqC2DaFMkKoTw1_eqeTRieoUiiNSbdebASrJOLytIDibiINzceXWkPkMzNTiNpQzIYbgadhSKnHTyty",
+        "email": "joe.assistant@okcrm.onekeel.ai"
       },
       "charlie": {
         "id": "charlie",
@@ -38,7 +39,8 @@
           "expansion_potential"
         ],
         "ai_model": "claude-3-sonnet",
-        "supermemory_key": null
+        "supermemory_key": null,
+        "email": "charlie.assistant@okcrm.onekeel.ai"
       },
       "tre": {
         "id": "tre",
@@ -54,7 +56,8 @@
           "action_items"
         ],
         "ai_model": "claude-3-sonnet",
-        "supermemory_key": "sm_dy7m3s5FbqC2DaFMkKoTw1_BuDUfYMUxhFsVTXOAGylAWPDEIHEjBZCtXLjeYCjSHtPigMKaiRFfSBypZSpQiki"
+        "supermemory_key": "sm_dy7m3s5FbqC2DaFMkKoTw1_BuDUfYMUxhFsVTXOAGylAWPDEIHEjBZCtXLjeYCjSHtPigMKaiRFfSBypZSpQiki",
+        "email": "tre.assistant@okcrm.onekeel.ai"
       },
       "josh": {
         "id": "josh",
@@ -70,7 +73,8 @@
           "action_items"
         ],
         "ai_model": "claude-3-sonnet",
-        "supermemory_key": "sm_dy7m3s5FbqC2DaFMkKoTw1_ubkCkKKNiUJYISeeAzAWxCQnkwwcmNdXSOQPVjcLLUxIjDYVZfBFVTGqiAMNTsJq"
+        "supermemory_key": "sm_dy7m3s5FbqC2DaFMkKoTw1_ubkCkKKNiUJYISeeAzAWxCQnkwwcmNdXSOQPVjcLLUxIjDYVZfBFVTGqiAMNTsJq",
+        "email": "josh.assistant@okcrm.onekeel.ai"
       },
       "kyle": {
         "id": "kyle",
@@ -86,7 +90,8 @@
           "action_items"
         ],
         "ai_model": "claude-3-sonnet",
-        "supermemory_key": "sm_dy7m3s5FbqC2DaFMkKoTw1_TVJLoCJmFTPcMWGzsjkcmQFCqUPiWjvmMlJIbfCewaQHReUcuQwcxWNCzUvmaOcG"
+        "supermemory_key": "sm_dy7m3s5FbqC2DaFMkKoTw1_TVJLoCJmFTPcMWGzsjkcmQFCqUPiWjvmMlJIbfCewaQHReUcuQwcxWNCzUvmaOcG",
+        "email": "kyle.assistant@okcrm.onekeel.ai"
       },
       "amanda": {
         "id": "amanda",
@@ -102,7 +107,8 @@
           "lead_generation"
         ],
         "ai_model": "claude-3-sonnet",
-        "supermemory_key": "sm_dy7m3s5FbqC2DaFMkKoTw1_GPmSAYgDtFWriEnwfndnmAXGJnkvrfUTHrnbOHTavUYRsZgbAblisfikmUAwrjhs"
+        "supermemory_key": "sm_dy7m3s5FbqC2DaFMkKoTw1_GPmSAYgDtFWriEnwfndnmAXGJnkvrfUTHrnbOHTavUYRsZgbAblisfikmUAwrjhs",
+        "email": "amanda.assistant@okcrm.onekeel.ai"
       }
     },
     "executive": {
@@ -177,6 +183,16 @@
           "host": "localhost"
         }
       }
+    }
+  },
+  "email": {
+    "domain": "okcrm.onekeel.ai",
+    "subdomain": "OKCRM.onekeel.ai",
+    "provider": "mailgun",
+    "settings": {
+      "apiKey": null,
+      "domain": "okcrm.onekeel.ai",
+      "fromAddress": "noreply@okcrm.onekeel.ai"
     }
   }
 }
