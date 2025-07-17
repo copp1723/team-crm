@@ -20,7 +20,8 @@
     "lint": "ESLINT_USE_FLAT_CONFIG=false eslint .",
     "diagnose": "node scripts/diagnostic-suite.js",
     "fix-config": "node scripts/fix-configuration-issues.js",
-    "setup-render": "node scripts/setup-render-environment.js"
+    "setup-render": "node scripts/setup-render-environment.js",
+    "setup-calendar": "node scripts/setup-google-calendar.js"
   },
   "devDependencies": {
     "eslint": "^8.57.1"

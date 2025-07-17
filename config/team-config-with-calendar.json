@@ -149,12 +149,16 @@
     "enabled": true,
     "provider": "google",
     "settings": {
-      "clientId": null,
-      "clientSecret": null,
-      "redirectUri": "https://team-crm.onrender.com/auth/google/callback",
+      "clientId": "YOUR_CLIENT_ID_HERE",
+      "clientSecret": "YOUR_CLIENT_SECRET_HERE",
+      "redirectUri": "https://team-crm-26ks.onrender.com/auth/google/callback",
+      "serviceAccountEmail": null,
+      "privateKey": null,
       "timezone": "America/Chicago",
-      "workingHoursStart": 9,
-      "workingHoursEnd": 17,
+      "workingHours": {
+        "start": 9,
+        "end": 17
+      },
       "scopes": [
         "https://www.googleapis.com/auth/calendar",
         "https://www.googleapis.com/auth/calendar.events"
