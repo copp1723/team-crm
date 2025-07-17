@@ -18,7 +18,8 @@
           "pilot_metrics",
           "upsell_opportunities"
         ],
-        "ai_model": "claude-3-sonnet"
+        "ai_model": "claude-3-sonnet",
+        "supermemory_key": null
       },
       "charlie": {
         "id": "charlie",
@@ -36,7 +37,8 @@
           "competitive_positioning",
           "expansion_potential"
         ],
-        "ai_model": "claude-3-sonnet"
+        "ai_model": "claude-3-sonnet",
+        "supermemory_key": null
       },
       "tre": {
         "id": "tre",
@@ -51,7 +53,8 @@
           "meeting_notes",
           "action_items"
         ],
-        "ai_model": "claude-3-sonnet"
+        "ai_model": "claude-3-sonnet",
+        "supermemory_key": null
       },
       "josh": {
         "id": "josh",
@@ -66,7 +69,8 @@
           "meeting_notes",
           "action_items"
         ],
-        "ai_model": "claude-3-sonnet"
+        "ai_model": "claude-3-sonnet",
+        "supermemory_key": null
       },
       "kyle": {
         "id": "kyle",
@@ -82,7 +86,8 @@
           "process_improvements",
           "system_updates"
         ],
-        "ai_model": "claude-3-sonnet"
+        "ai_model": "claude-3-sonnet",
+        "supermemory_key": null
       },
       "amanda": {
         "id": "amanda",
@@ -98,7 +103,8 @@
           "workflow_issues",
           "quality_metrics"
         ],
-        "ai_model": "claude-3-sonnet"
+        "ai_model": "claude-3-sonnet",
+        "supermemory_key": null
       }
     },
     "executives": [

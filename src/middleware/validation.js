@@ -49,17 +49,12 @@ export class ValidationMiddleware {
                 });
             }
             
-            // Content validation
-            if (ValidationMiddleware.containsSuspiciousContent(updateText)) {
-                return res.status(400).json({
-                    error: 'Hmm, something in your update triggered our safety filters. Could you rephrase it without special characters or code snippets?',
-                    code: 'SUSPICIOUS_CONTENT'
-                });
-            }
+            // No content validation - internal tool only
+            // All content is allowed for trusted team members
             
-            // Sanitize inputs
-            req.body.memberName = ValidationMiddleware.sanitizeString(memberName);
-            req.body.updateText = ValidationMiddleware.sanitizeText(updateText);
+            // Minimal sanitization - just trim whitespace
+            req.body.memberName = memberName.trim();
+            req.body.updateText = updateText.trim();
             
             // Validate metadata if present
             if (metadata) {
@@ -79,7 +74,7 @@ export class ValidationMiddleware {
                     });
                 }
                 
-                req.body.metadata = ValidationMiddleware.sanitizeMetadata(metadata);
+                req.body.metadata = metadata;
             }
             
             next();
@@ -182,93 +177,19 @@ export class ValidationMiddleware {
     }
     
     /**
-     * Sanitize a general string
+     * Minimal sanitization - just trim and normalize
      */
     static sanitizeString(str) {
         if (typeof str !== 'string') return str;
-        
-        return str
-            .trim()
-            .replace(/[<>]/g, '') // Remove potential HTML
-            .replace(/[\x00-\x1F\x7F]/g, '') // Remove control characters
-            .normalize('NFC'); // Normalize Unicode
+        return str.trim().normalize('NFC');
     }
     
     /**
-     * Sanitize update text more carefully
+     * Minimal text sanitization - just trim and normalize
      */
     static sanitizeText(text) {
         if (typeof text !== 'string') return text;
-        
-        return text
-            .trim()
-            .replace(/[<>]/g, '') // Remove HTML brackets
-            .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '') // Remove most control chars but keep tabs/newlines
-            .replace(/\s+/g, ' ') // Normalize whitespace
-            .normalize('NFC')
-            .substring(0, 10000); // Enforce length limit
-    }
-    
-    /**
-     * Sanitize metadata object
-     */
-    static sanitizeMetadata(metadata) {
-        if (typeof metadata !== 'object' || metadata === null) {
-            return {};
-        }
-        
-        const sanitized = {};
-        
-        for (const [key, value] of Object.entries(metadata)) {
-            // Sanitize keys
-            const sanitizedKey = ValidationMiddleware.sanitizeString(key).substring(0, 100);
-            
-            if (sanitizedKey) {
-                // Sanitize values based on type
-                if (typeof value === 'string') {
-                    sanitized[sanitizedKey] = ValidationMiddleware.sanitizeString(value).substring(0, 500);
-                } else if (typeof value === 'number' && isFinite(value)) {
-                    sanitized[sanitizedKey] = value;
-                } else if (typeof value === 'boolean') {
-                    sanitized[sanitizedKey] = value;
-                } else if (Array.isArray(value)) {
-                    sanitized[sanitizedKey] = value
-                        .slice(0, 20) // Limit array length
-                        .map(item => typeof item === 'string' ? ValidationMiddleware.sanitizeString(item).substring(0, 200) : item)
-                        .filter(item => typeof item === 'string' || typeof item === 'number' || typeof item === 'boolean');
-                }
-                // Ignore other types (objects, functions, etc.)
-            }
-        }
-        
-        return sanitized;
-    }
-    
-    /**
-     * Check for suspicious content patterns
-     */
-    static containsSuspiciousContent(text) {
-        const suspiciousPatterns = [
-            // Script injection patterns
-            /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi,
-            /javascript:/gi,
-            /on\w+\s*=/gi,
-            
-            // SQL injection patterns
-            /('|(\\');)|(--)|(;)|(\/\*)|(\*\/)/gi,
-            /\b(union|select|insert|update|delete|drop|create|alter)\b/gi,
-            
-            // Command injection patterns
-            /[;&|`$]/g,
-            
-            // Excessive special characters
-            /[<>{}[\]"'\\]{10,}/g,
-            
-            // Suspicious URLs
-            /https?:\/\/[^\s]+\.(tk|ml|ga|cf)/gi
-        ];
-        
-        return suspiciousPatterns.some(pattern => pattern.test(text));
+        return text.trim().normalize('NFC');
     }
     
     /**
@@ -302,42 +223,15 @@ export class ValidationMiddleware {
     }
     
     /**
-     * Create input sanitization middleware for any endpoint
+     * Minimal input sanitization for internal tool
      */
     static sanitizeInputs(req, res, next) {
-        // Recursively sanitize request body
+        // Just ensure body exists and is an object
         if (req.body && typeof req.body === 'object') {
-            req.body = ValidationMiddleware.deepSanitize(req.body);
+            // No deep sanitization needed for internal tool
+            next();
+        } else {
+            next();
         }
-        
-        next();
-    }
-    
-    /**
-     * Deep sanitization of nested objects
-     */
-    static deepSanitize(obj, depth = 0) {
-        if (depth > 10) return {}; // Prevent deep recursion
-        
-        if (typeof obj === 'string') {
-            return ValidationMiddleware.sanitizeString(obj);
-        }
-        
-        if (Array.isArray(obj)) {
-            return obj.slice(0, 100).map(item => ValidationMiddleware.deepSanitize(item, depth + 1));
-        }
-        
-        if (obj && typeof obj === 'object') {
-            const sanitized = {};
-            for (const [key, value] of Object.entries(obj)) {
-                const sanitizedKey = ValidationMiddleware.sanitizeString(key).substring(0, 100);
-                if (sanitizedKey) {
-                    sanitized[sanitizedKey] = ValidationMiddleware.deepSanitize(value, depth + 1);
-                }
-            }
-            return sanitized;
-        }
-        
-        return obj;
     }
 }

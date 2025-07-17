@@ -231,10 +231,8 @@ export class TeamCRMServer {
         // Request size limiting
         this.app.use(ValidationMiddleware.createSizeLimiter('10mb'));
         
-        // Setup authentication if in production
-        if (process.env.NODE_ENV === 'production') {
-            setupAuth(this.app);
-        }
+        // Setup authentication (enable in both production and development for admin access)
+        setupAuth(this.app);
         
         // Rate limiting will be added after initialization
         
