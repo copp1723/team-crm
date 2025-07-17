@@ -1121,7 +1121,7 @@ export class TeamCRMServer {
             <label for="memberSelect"><strong>Who are you?</strong></label><br>
             <select id="memberSelect">
                 <option value="">Select your name...</option>
-                ${members.map(member => `<option value="${member.key}">${member.name} (${member.role})</option>`).join('')}
+                \${members.map(member => \`<option value="\${member.key}">\${member.name} (\${member.role})</option>\`).join('')}
             </select>
         </div>
         
@@ -1217,12 +1217,12 @@ export class TeamCRMServer {
             div.className = 'update-item';
             
             if (message.type === 'updateProcessed') {
-                div.innerHTML = `<strong>${message.data.memberName}</strong> submitted an update - ${message.data.extractedItems} items extracted`;
+                div.innerHTML = \`<strong>\${message.data.memberName}</strong> submitted an update - \${message.data.extractedItems} items extracted\`;
             } else if (message.type === 'summaryGenerated') {
-                div.innerHTML = `<strong>Executive Summary Generated</strong> - ${message.data.processedUpdates} updates processed`;
+                div.innerHTML = \`<strong>Executive Summary Generated</strong> - \${message.data.processedUpdates} updates processed\`;
                 div.style.borderLeftColor = '#28a745';
             } else if (message.type === 'connected') {
-                div.innerHTML = `Connected: ${message.message}`;
+                div.innerHTML = \`Connected: \${message.message}\`;
                 div.style.borderLeftColor = '#28a745';
             }
             
