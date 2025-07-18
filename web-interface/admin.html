@@ -238,6 +238,16 @@
             background: #333333;
         }
 
+        .btn-primary:active {
+            background: #000000;
+            transform: translateY(1px);
+        }
+
+        .btn-primary:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+        }
+
         .btn-secondary {
             background: #ffffff;
             color: #000000;
@@ -536,7 +546,7 @@
                         </div>
                     </div>
                     <div class="form-actions">
-                        <button type="submit" class="btn btn-primary" onclick="console.log('Save button clicked directly!')">Save Changes</button>
+                        <button type="button" class="btn btn-primary" onclick="saveUserChanges()">Save Changes</button>
                         <button type="button" class="btn btn-secondary" onclick="cancelEdit()">Cancel</button>
                         <button type="button" class="btn btn-danger" onclick="deleteUser()">Delete User</button>
                     </div>
@@ -935,30 +945,31 @@
             }
         });
 
-        // Edit user form submission
-        document.getElementById('user-edit-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
+        // Save user changes function
+        async function saveUserChanges() {
             console.log('Save button clicked!'); // Debug log
-            
-            // Check form validation
-            const form = e.target;
-            console.log('Form valid:', form.checkValidity()); // Debug log
-            if (!form.checkValidity()) {
-                console.log('Form validation failed!'); // Debug log
-                form.reportValidity();
-                return;
-            }
             
             if (!currentEditUser) {
                 console.log('No current edit user!'); // Debug log
+                showStatus('Please select a user first', 'error');
                 return;
             }
             
             console.log('Processing save for user:', currentEditUser); // Debug log
             
+            // Check form validation
+            const nameField = document.getElementById('edit-name');
+            const roleField = document.getElementById('edit-role');
+            
+            if (!nameField.value.trim() || !roleField.value.trim()) {
+                console.log('Form validation failed!'); // Debug log
+                showStatus('Please fill in all required fields (Name and Role)', 'error');
+                return;
+            }
+            
             const userData = {
-                name: document.getElementById('edit-name').value,
-                role: document.getElementById('edit-role').value,
+                name: nameField.value.trim(),
+                role: roleField.value.trim(),
                 focus_areas: document.getElementById('edit-focus').value.split(',').map(f => f.trim()).filter(f => f),
                 isExecutive: document.getElementById('edit-executive').checked
             };
@@ -1014,6 +1025,12 @@
                 console.error('Error in save:', error); // Debug log
                 showStatus('Error updating user: ' + error.message, 'error');
             }
+        }
+
+        // Edit user form submission (keeping for compatibility)
+        document.getElementById('user-edit-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await saveUserChanges();
         });
 
         // Delete user
