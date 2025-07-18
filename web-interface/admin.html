@@ -1000,6 +1000,9 @@
             
             try {
                 console.log('Making API request to update user...'); // Debug log
+                console.log('Request URL:', `/api/admin/users/${currentEditUser}`); // Debug log
+                console.log('Request data:', JSON.stringify(userData, null, 2)); // Debug log
+                
                 const response = await fetch(`/api/admin/users/${currentEditUser}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
@@ -1007,11 +1010,12 @@
                 });
                 
                 console.log('API response status:', response.status); // Debug log
+                console.log('API response headers:', Object.fromEntries(response.headers.entries())); // Debug log
                 
                 if (!response.ok) {
                     const errorText = await response.text();
                     console.log('API error response:', errorText); // Debug log
-                    throw new Error('Failed to update user: ' + errorText);
+                    throw new Error(`HTTP ${response.status}: ${errorText}`);
                 }
                 
                 const result = await response.json();
@@ -1023,6 +1027,7 @@
                 
             } catch (error) {
                 console.error('Error in save:', error); // Debug log
+                console.error('Error stack:', error.stack); // Debug log
                 showStatus('Error updating user: ' + error.message, 'error');
             }
         }
