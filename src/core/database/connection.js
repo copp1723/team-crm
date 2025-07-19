@@ -31,7 +31,7 @@ export class DatabaseConnection {
                 max: 20, // Maximum number of clients in the pool
                 idleTimeoutMillis: 30000,
                 connectionTimeoutMillis: 2000,
-                ssl: process.env.DATABASE_URL && process.env.DATABASE_URL.includes('render.com') ? { rejectUnauthorized: false } : false,
+                ssl: process.env.DATABASE_URL ? { rejectUnauthorized: false } : false,
             });
 
             // Test connection

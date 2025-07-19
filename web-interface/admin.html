@@ -238,16 +238,6 @@
             background: #333333;
         }
 
-        .btn-primary:active {
-            background: #000000;
-            transform: translateY(1px);
-        }
-
-        .btn-primary:disabled {
-            background: #cccccc;
-            cursor: not-allowed;
-        }
-
         .btn-secondary {
             background: #ffffff;
             color: #000000;
@@ -526,18 +516,6 @@
                                 <label for="edit-email-enabled">Enable email processing for this assistant</label>
                             </div>
                         </div>
-                        <div class="form-group">
-                            <label class="form-label">Supermemory API Key</label>
-                            <input type="password" class="form-input" id="edit-supermemory-key" 
-                                   placeholder="sm_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx">
-                            <small class="form-help">Individual Supermemory API key for this user's personal assistant</small>
-                        </div>
-                        <div class="form-group">
-                            <div class="form-checkbox">
-                                <input type="checkbox" id="edit-supermemory-enabled">
-                                <label for="edit-supermemory-enabled">Enable Supermemory for this assistant</label>
-                            </div>
-                        </div>
                         <div class="form-group full-width">
                             <div class="form-checkbox">
                                 <input type="checkbox" id="edit-executive">
@@ -546,7 +524,7 @@
                         </div>
                     </div>
                     <div class="form-actions">
-                        <button type="button" class="btn btn-primary" onclick="saveUserChanges()">Save Changes</button>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
                         <button type="button" class="btn btn-secondary" onclick="cancelEdit()">Cancel</button>
                         <button type="button" class="btn btn-danger" onclick="deleteUser()">Delete User</button>
                     </div>
@@ -891,9 +869,6 @@
             
             // Load email configuration for this user
             loadUserEmailConfig(username);
-            
-            // Load supermemory configuration for this user
-            loadUserSupermemoryConfig(username);
         }
 
         function cancelEdit() {
@@ -945,36 +920,18 @@
             }
         });
 
-        // Save user changes function
-        async function saveUserChanges() {
-            console.log('Save button clicked!'); // Debug log
+        // Edit user form submission
+        document.getElementById('user-edit-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
             
-            if (!currentEditUser) {
-                console.log('No current edit user!'); // Debug log
-                showStatus('Please select a user first', 'error');
-                return;
-            }
-            
-            console.log('Processing save for user:', currentEditUser); // Debug log
-            
-            // Check form validation
-            const nameField = document.getElementById('edit-name');
-            const roleField = document.getElementById('edit-role');
-            
-            if (!nameField.value.trim() || !roleField.value.trim()) {
-                console.log('Form validation failed!'); // Debug log
-                showStatus('Please fill in all required fields (Name and Role)', 'error');
-                return;
-            }
+            if (!currentEditUser) return;
             
             const userData = {
-                name: nameField.value.trim(),
-                role: roleField.value.trim(),
+                name: document.getElementById('edit-name').value,
+                role: document.getElementById('edit-role').value,
                 focus_areas: document.getElementById('edit-focus').value.split(',').map(f => f.trim()).filter(f => f),
                 isExecutive: document.getElementById('edit-executive').checked
             };
-            
-            console.log('User data to save:', userData); // Debug log
             
             // Save email configuration separately
             const emailConfig = {
@@ -983,59 +940,25 @@
             };
             
             if (emailConfig.email) {
-                console.log('Saving email config:', emailConfig); // Debug log
                 await saveUserEmailConfig(currentEditUser, emailConfig);
             }
             
-            // Save supermemory configuration separately
-            const supermemoryConfig = {
-                apiKey: document.getElementById('edit-supermemory-key').value,
-                enabled: document.getElementById('edit-supermemory-enabled').checked
-            };
-            
-            if (supermemoryConfig.apiKey) {
-                console.log('Saving supermemory config:', supermemoryConfig); // Debug log
-                await saveUserSupermemoryConfig(currentEditUser, supermemoryConfig);
-            }
-            
             try {
-                console.log('Making API request to update user...'); // Debug log
-                console.log('Request URL:', `/api/admin/users/${currentEditUser}`); // Debug log
-                console.log('Request data:', JSON.stringify(userData, null, 2)); // Debug log
-                
                 const response = await fetch(`/api/admin/users/${currentEditUser}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(userData)
                 });
                 
-                console.log('API response status:', response.status); // Debug log
-                console.log('API response headers:', Object.fromEntries(response.headers.entries())); // Debug log
-                
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    console.log('API error response:', errorText); // Debug log
-                    throw new Error(`HTTP ${response.status}: ${errorText}`);
-                }
-                
-                const result = await response.json();
-                console.log('API success response:', result); // Debug log
+                if (!response.ok) throw new Error('Failed to update user');
                 
                 showStatus('User updated successfully!', 'success');
                 await loadUsers();
                 cancelEdit();
                 
             } catch (error) {
-                console.error('Error in save:', error); // Debug log
-                console.error('Error stack:', error.stack); // Debug log
                 showStatus('Error updating user: ' + error.message, 'error');
             }
-        }
-
-        // Edit user form submission (keeping for compatibility)
-        document.getElementById('user-edit-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            await saveUserChanges();
         });
 
         // Delete user
@@ -1339,47 +1262,6 @@
                 
             } catch (error) {
                 showStatus('Error saving email config: ' + error.message, 'error');
-                throw error;
-            }
-        }
-
-        async function loadUserSupermemoryConfig(username) {
-            try {
-                const response = await fetch('/api/admin/supermemory-config');
-                if (!response.ok) throw new Error('Failed to load supermemory config');
-                
-                const supermemoryConfig = await response.json();
-                const userConfig = supermemoryConfig.assistants?.[username];
-                
-                if (userConfig) {
-                    document.getElementById('edit-supermemory-key').value = userConfig.apiKey || '';
-                    document.getElementById('edit-supermemory-enabled').checked = userConfig.enabled || false;
-                } else {
-                    document.getElementById('edit-supermemory-key').value = '';
-                    document.getElementById('edit-supermemory-enabled').checked = false;
-                }
-                
-            } catch (error) {
-                console.warn('Error loading supermemory config:', error.message);
-                document.getElementById('edit-supermemory-key').value = '';
-                document.getElementById('edit-supermemory-enabled').checked = false;
-            }
-        }
-
-        async function saveUserSupermemoryConfig(username, supermemoryConfig) {
-            try {
-                const response = await fetch(`/api/admin/supermemory-config/assistant/${username}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(supermemoryConfig)
-                });
-                
-                if (!response.ok) throw new Error('Failed to save supermemory config');
-                
-                showStatus(`Supermemory configuration saved for ${username}`, 'success');
-                
-            } catch (error) {
-                showStatus('Error saving supermemory config: ' + error.message, 'error');
                 throw error;
             }
         }

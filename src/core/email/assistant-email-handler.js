@@ -24,6 +24,9 @@ export class AssistantEmailHandler {
         this.assistantCache = new Map();
         this.processingQueue = [];
         this.isProcessing = false;
+        this.TEAM_CACHE_TTL = 300000; // 5 minutes
+        this.teamMembersCache = null;
+        this.cacheTimestamp = 0;
     }
 
     /**
@@ -50,6 +53,34 @@ export class AssistantEmailHandler {
      */
     async loadAssistants() {
         try {
+            const now = Date.now();
+            
+            // Check if cache is still valid
+            if (this.teamMembersCache && (now - this.cacheTimestamp) < this.TEAM_CACHE_TTL) {
+                this.logger.debug('Using cached team members data');
+                
+                // Rebuild assistant cache from cached data
+                this.assistantCache.clear();
+                for (const member of this.teamMembersCache) {
+                    const assistantEmail = this.generateAssistantEmail(member.external_id);
+                    
+                    this.assistantCache.set(assistantEmail.toLowerCase(), {
+                        id: member.id,
+                        externalId: member.external_id,
+                        name: member.name,
+                        email: member.email,
+                        role: member.role,
+                        aiModel: member.ai_model,
+                        supermemorySpaceId: member.supermemory_space_id,
+                        assistantName: member.assistant_name || `${member.name}'s Assistant`,
+                        assistantEmail: assistantEmail,
+                        configuration: member.configuration || {},
+                        learningPreferences: member.learning_preferences || {}
+                    });
+                }
+                return;
+            }
+            
             const result = await db.query(`
                 SELECT 
                     tm.id,
@@ -66,6 +97,10 @@ export class AssistantEmailHandler {
                 LEFT JOIN personal_assistants pa ON pa.member_id = tm.id
                 WHERE tm.active = true
             `);
+            
+            // Store the raw results in cache
+            this.teamMembersCache = result.rows;
+            this.cacheTimestamp = now;
             
             this.assistantCache.clear();
             
@@ -87,12 +122,25 @@ export class AssistantEmailHandler {
                 });
             }
             
-            this.logger.info('Assistants loaded', { count: this.assistantCache.size });
+            this.logger.info('Assistants loaded', { 
+                count: this.assistantCache.size,
+                cached: false 
+            });
             
         } catch (error) {
             this.logger.error('Failed to load assistants', { error: error.message });
             throw error;
         }
+    }
+    
+    /**
+     * Clear the cache to force a refresh
+     */
+    clearCache() {
+        this.teamMembersCache = null;
+        this.cacheTimestamp = 0;
+        this.assistantCache.clear();
+        this.logger.info('Cleared team members cache');
     }
 
     /**

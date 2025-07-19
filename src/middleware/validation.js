@@ -89,55 +89,15 @@ export class ValidationMiddleware {
     }
     
     /**
-     * Rate limiting middleware
+     * Rate limiting middleware - DEPRECATED
+     * Use RedisRateLimiter from redis-rate-limiter.js instead
+     * This method is kept for backward compatibility only
      */
     static createRateLimiter(options = {}) {
-        const windowMs = options.windowMs || 60000; // 1 minute
-        const maxRequests = options.maxRequests || 10;
-        const skipSuccessfulRequests = options.skipSuccessfulRequests || false;
-        
-        const requests = new Map();
-        
-        return (req, res, next) => {
-            const clientId = ValidationMiddleware.getClientIdentifier(req);
-            const now = Date.now();
-            const windowStart = now - windowMs;
-            
-            // Clean old entries
-            for (const [id, timestamps] of requests.entries()) {
-                const filtered = timestamps.filter(ts => ts > windowStart);
-                if (filtered.length === 0) {
-                    requests.delete(id);
-                } else {
-                    requests.set(id, filtered);
-                }
-            }
-            
-            // Check current client
-            const clientRequests = requests.get(clientId) || [];
-            const validRequests = clientRequests.filter(ts => ts > windowStart);
-            
-            if (validRequests.length >= maxRequests) {
-                return res.status(429).json({
-                    error: 'Slow down there, speed demon! You\'re sending updates faster than we can handle. Take a breather and try again in a minute.',
-                    code: 'RATE_LIMIT_EXCEEDED',
-                    retryAfter: Math.ceil(windowMs / 1000)
-                });
-            }
-            
-            // Record this request
-            validRequests.push(now);
-            requests.set(clientId, validRequests);
-            
-            // Add rate limit headers
-            res.set({
-                'X-RateLimit-Limit': maxRequests,
-                'X-RateLimit-Remaining': Math.max(0, maxRequests - validRequests.length),
-                'X-RateLimit-Reset': new Date(now + windowMs).toISOString()
-            });
-            
-            next();
-        };
+        console.warn('ValidationMiddleware.createRateLimiter is deprecated. Use RedisRateLimiter instead.');
+        // Import and use the Redis rate limiter as the single source of truth
+        const { RedisRateLimiter } = require('./redis-rate-limiter.js');
+        return RedisRateLimiter.createMiddleware(options);
     }
     
     /**

@@ -11,14 +11,12 @@ export function setupAuth(app) {
         'josh': process.env.JOSH_PASSWORD || 'changemer2bb3t'
     };
 
-    console.log('DEBUG AUTH USERS:', users);
-
-    // Admin authentication disabled for small internal team
-    // app.use(['/admin', '/executive-dashboard', '/api/admin'], basicAuth({
-    //     users: users,
-    //     challenge: true,
-    //     unauthorizedResponse: 'Access denied. Please check your credentials.'
-    // }));
+    // Apply auth to all routes
+    app.use(basicAuth({
+        users: users,
+        challenge: true,
+        unauthorizedResponse: 'Access denied. Please check your credentials.'
+    }));
 
     // Executive dashboard requires executive credentials
     app.use('/executive-dashboard', (req, res, next) => {
@@ -28,11 +26,11 @@ export function setupAuth(app) {
         next();
     });
     
-    // Admin interface authentication disabled for internal team
-    // app.use('/admin', (req, res, next) => {
-    //     if (req.auth?.user !== 'tre' && req.auth?.user !== 'josh') {
-    //         return res.status(403).send('Admin access only');
-    //     }
-    //     next();
-    // });
+    // Admin interface requires executive credentials
+    app.use('/admin', (req, res, next) => {
+        if (req.auth?.user !== 'tre' && req.auth?.user !== 'josh') {
+            return res.status(403).send('Admin access only');
+        }
+        next();
+    });
 }
